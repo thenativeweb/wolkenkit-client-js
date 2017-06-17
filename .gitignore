@@ -1,0 +1,9 @@
+# Node.js folders
+*coverage/
+*node_modules/
+
+# OS generated files and folders
+.DS_Store
+npm-debug.log
+
+test/integration/dist/

@@ -1,0 +1,77 @@
+{
+  "name": "wolkenkit-client",
+  "version": "0.0.0",
+  "description": "wolkenkit-client is a client to access wolkenkit applications.",
+  "contributors": [
+    {
+      "name": "Golo Roden",
+      "email": "golo.roden@thenativeweb.io"
+    },
+    {
+      "name": "Matthias Wagler",
+      "email": "matthias.wagler@thenativeweb.io"
+    },
+    {
+      "name": "Michael Scherer",
+      "email": "mail@michael-scherer.net"
+    }
+  ],
+  "main": "dist/wolkenkit-client.node.js",
+  "browser": {
+    "http": "http-browserify-2/http",
+    "https": "http-browserify-2/https",
+    "ws": "./lib/wires/ws-browser"
+  },
+  "dependencies": {
+    "async": "2.4.1",
+    "commands-events": "1.0.0",
+    "datasette": "0.3.4",
+    "defekt": "0.1.3",
+    "es6-promise": "4.1.0",
+    "http-browserify-2": "0.5.1",
+    "is-node": "1.0.2",
+    "json-lines-client": "0.7.9",
+    "lodash": "4.17.4",
+    "parse-duration": "0.1.1",
+    "streamtoarray": "0.1.4",
+    "uuidv4": "0.5.0",
+    "ws": "3.0.0"
+  },
+  "devDependencies": {
+    "assertthat": "0.9.0",
+    "babel-loader": "7.0.0",
+    "body-parser": "1.17.2",
+    "cors": "2.8.3",
+    "express": "4.15.3",
+    "knockat": "0.2.1",
+    "limes": "0.5.0",
+    "mockery": "2.0.0",
+    "mongodb": "2.2.28",
+    "nock": "9.0.13",
+    "processenv": "0.1.1",
+    "retry": "0.10.1",
+    "roboter": "0.15.2",
+    "roboter-server": "0.15.2",
+    "runfork": "0.3.1",
+    "shelljs": "0.7.8",
+    "superagent": "3.5.2",
+    "wdio": "0.3.3",
+    "wdio-mocha-framework": "0.5.10",
+    "wdio-sauce-service": "0.4.0",
+    "wdio-selenium-standalone-service": "0.0.9",
+    "wdio-spec-reporter": "0.1.0",
+    "wdio-static-server-service": "1.0.1",
+    "wdio-webpack-service": "1.0.1",
+    "webpack": "2.6.1",
+    "webpack-node-externals": "1.6.0",
+    "wolkenkit-test": "1.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/thenativeweb/wolkenkit-client-js.git"
+  },
+  "keywords": [
+    "wolkenkit"
+  ],
+  "license": "LGPL-3.0"
+}

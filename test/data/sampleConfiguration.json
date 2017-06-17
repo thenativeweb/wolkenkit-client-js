@@ -1,0 +1,35 @@
+{
+  "writeModel": {
+    "network": {
+      "node": {
+        "commands": {
+          "ping": {}
+        },
+        "events": {
+          "pinged": {}
+        }
+      }
+    },
+    "foo": {
+      "bar": {
+        "commands": {
+          "baz": {},
+          "bas": {}
+        },
+        "events": {}
+      },
+      "nufta": {
+        "commands": {
+          "agnitfom": {}
+        },
+        "events": {}
+      }
+    }
+  },
+  "readModel": {
+    "lists": {
+      "pings": {},
+      "pongs": {}
+    }
+  }
+}
