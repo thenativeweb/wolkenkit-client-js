@@ -34,9 +34,6 @@ module.exports =
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
 /******/
-/******/ 	// identity function for calling harmony imports with the correct context
-/******/ 	__webpack_require__.i = function(value) { return value; };
-/******/
 /******/ 	// define getter function for harmony exports
 /******/ 	__webpack_require__.d = function(exports, name, getter) {
 /******/ 		if(!__webpack_require__.o(exports, name)) {
@@ -64,7 +61,7 @@ module.exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 31);
+/******/ 	return __webpack_require__(__webpack_require__.s = 5);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -81,12 +78,18 @@ module.exports = require("events");
 
 /***/ }),
 /* 2 */
+/***/ (function(module, exports) {
+
+module.exports = require("uuidv4");
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var https = __webpack_require__(37);
+var https = __webpack_require__(14);
 
 var request = function request(options, reqData, callback) {
   if (!options) {
@@ -170,12 +173,6 @@ var request = function request(options, reqData, callback) {
 module.exports = request;
 
 /***/ }),
-/* 3 */
-/***/ (function(module, exports) {
-
-module.exports = require("uuidv4");
-
-/***/ }),
 /* 4 */
 /***/ (function(module, exports) {
 
@@ -188,8 +185,83 @@ module.exports = require("stream");
 "use strict";
 
 
-var None = __webpack_require__(22),
-    OpenIdConnect = __webpack_require__(23);
+var isNode = __webpack_require__(6),
+    Promise = __webpack_require__(0).Promise;
+
+var authenticationStrategies = __webpack_require__(7),
+    getApp = __webpack_require__(10);
+
+var appCache = {};
+
+var wolkenkitClient = {
+  authentication: authenticationStrategies,
+
+  connect: function connect(options) {
+    if (!options) {
+      throw new Error('Options are missing.');
+    }
+    if (!options.host) {
+      throw new Error('Host is missing.');
+    }
+
+    var configuration = options.configuration,
+        host = options.host,
+        _options$port = options.port,
+        port = _options$port === undefined ? 443 : _options$port,
+        _options$protocol = options.protocol,
+        protocol = _options$protocol === undefined ? isNode ? 'https' : 'wss' : _options$protocol,
+        _options$authenticati = options.authentication,
+        authentication = _options$authenticati === undefined ? new this.authentication.None() : _options$authenticati;
+
+
+    return new Promise(function (resolve, reject) {
+      setTimeout(function () {
+        var appKey = host + ':' + port;
+        var app = appCache[appKey];
+
+        if (app) {
+          return resolve(app);
+        }
+
+        getApp({ host: host, port: port, protocol: protocol, authentication: authentication, configuration: configuration }).then(function (newApp) {
+          appCache[appKey] = newApp;
+          resolve(newApp);
+        }).catch(reject);
+      }, 0.05 * 1000);
+    });
+  },
+
+
+  // Internal function, for tests only.
+  reset: function reset(options) {
+    options = options || {};
+    options.keepLocalStorage = options.keepLocalStorage || false;
+
+    Object.keys(appCache).forEach(function (appName) {
+      appCache[appName].destroy(options);
+    });
+
+    appCache = {};
+  }
+};
+
+module.exports = wolkenkitClient;
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports) {
+
+module.exports = require("is-node");
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var None = __webpack_require__(8),
+    OpenIdConnect = __webpack_require__(9);
 
 var authentication = {
   None: None,
@@ -199,7 +271,258 @@ var authentication = {
 module.exports = authentication;
 
 /***/ }),
-/* 6 */
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var None = function () {
+  function None() {
+    _classCallCheck(this, None);
+  }
+
+  _createClass(None, [{
+    key: 'login',
+    value: function login() {
+      this.onError(new Error('Invalid operation.'));
+    }
+  }, {
+    key: 'logout',
+    value: function logout() {
+      this.onError(new Error('Invalid operation.'));
+    }
+
+    /* eslint-disable class-methods-use-this */
+
+  }, {
+    key: 'willAuthenticate',
+    value: function willAuthenticate(proceed) {
+      proceed();
+    }
+  }, {
+    key: 'onAuthenticating',
+    value: function onAuthenticating() {}
+  }, {
+    key: 'onAuthenticated',
+    value: function onAuthenticated() {}
+  }, {
+    key: 'onError',
+    value: function onError(err) {
+      throw err;
+    }
+  }, {
+    key: 'isLoggedIn',
+    value: function isLoggedIn() {
+      return false;
+    }
+  }, {
+    key: 'getToken',
+    value: function getToken() {
+      return undefined;
+    }
+  }, {
+    key: 'getProfile',
+    value: function getProfile() {
+      return undefined;
+    }
+    /* eslint-enable class-methods-use-this */
+
+  }]);
+
+  return None;
+}();
+
+module.exports = None;
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/* global window */
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var uuid = __webpack_require__(2);
+
+var OpenIdConnect = function () {
+  function OpenIdConnect(options) {
+    _classCallCheck(this, OpenIdConnect);
+
+    if (!options) {
+      throw new Error('Options are missing.');
+    }
+    if (!options.identityProviderUrl) {
+      throw new Error('Identity provider url is missing.');
+    }
+    if (!options.clientId) {
+      throw new Error('Client id is missing.');
+    }
+
+    this.identityProviderUrl = options.identityProviderUrl;
+    this.clientId = options.clientId;
+    this.redirectUrl = options.redirectUrl || window.location.protocol + '//' + window.location.host;
+    this.responseType = 'id_token token';
+    this.scope = ('openid ' + (options.scope || '')).trim();
+    this.strictMode = options.strictMode !== false;
+
+    this.onAuthenticating = options.onAuthenticating || this.onAuthenticating;
+    this.onAuthenticated = options.onAuthenticated || this.onAuthenticated;
+    this.onError = options.onError || this.onError;
+
+    // Only set the token if a hash is given, and if the hash contains a token.
+    this.handleReturnFromRedirect();
+  }
+
+  _createClass(OpenIdConnect, [{
+    key: 'onAuthenticating',
+
+
+    /* eslint-disable class-methods-use-this */
+    value: function onAuthenticating(proceed) {
+      proceed();
+    }
+  }, {
+    key: 'onAuthenticated',
+    value: function onAuthenticated() {}
+  }, {
+    key: 'onError',
+    value: function onError(err) {
+      throw err;
+    }
+    /* eslint-enable class-methods-use-this */
+
+  }, {
+    key: 'getKey',
+    value: function getKey() {
+      return 'id_token_' + this.clientId;
+    }
+  }, {
+    key: 'handleReturnFromRedirect',
+    value: function handleReturnFromRedirect() {
+      var nonce = window.localStorage.getItem('nonce'),
+          previousUrl = window.localStorage.getItem('redirectTo');
+
+      window.localStorage.removeItem('nonce');
+      window.localStorage.removeItem('redirectTo');
+
+      if (!window.location.hash) {
+        return;
+      }
+
+      var hash = window.location.hash;
+      var token = void 0;
+
+      try {
+        token = hash.match(/(#|&)id_token=([^&]+)/)[2];
+      } catch (ex) {
+        return;
+      }
+
+      if (this.strictMode && !nonce) {
+        return this.onError(new Error('Nonce is missing.'));
+      }
+
+      var body = OpenIdConnect.decodeBodyFromToken(token);
+
+      if (!body) {
+        return this.onError(new Error('Invalid token.'));
+      }
+      if (this.strictMode && !body.jti) {
+        return this.onError(new Error('Jti is missing.'));
+      }
+      if (this.strictMode && body.jti !== nonce) {
+        return this.onError(new Error('Nonce and jti mismatch.'));
+      }
+
+      window.localStorage.setItem(this.getKey(), token);
+      window.location.replace(previousUrl);
+
+      this.onAuthenticated(this.getProfile());
+    }
+  }, {
+    key: 'login',
+    value: function login() {
+      var _this = this;
+
+      this.onAuthenticating(function () {
+        var clientId = window.encodeURIComponent(_this.clientId),
+            identityProviderUrl = _this.identityProviderUrl,
+            redirectUrl = window.encodeURIComponent(_this.redirectUrl),
+            responseType = window.encodeURIComponent(_this.responseType),
+            scope = window.encodeURIComponent(_this.scope);
+
+        var nonce = uuid();
+
+        window.localStorage.setItem('nonce', nonce);
+        window.localStorage.setItem('redirectTo', window.location.href);
+        window.location.href = identityProviderUrl + '?client_id=' + clientId + '&redirect_uri=' + redirectUrl + '&scope=' + scope + '&response_type=' + responseType + '&nonce=' + nonce;
+      });
+    }
+  }, {
+    key: 'logout',
+    value: function logout() {
+      window.localStorage.removeItem(this.getKey());
+    }
+  }, {
+    key: 'isLoggedIn',
+    value: function isLoggedIn() {
+      return Boolean(window.localStorage.getItem(this.getKey()));
+    }
+  }, {
+    key: 'getToken',
+    value: function getToken() {
+      var token = window.localStorage.getItem(this.getKey());
+
+      if (!token) {
+        return;
+      }
+
+      return token;
+    }
+  }, {
+    key: 'getProfile',
+    value: function getProfile() {
+      var token = this.getToken();
+
+      if (!token) {
+        return;
+      }
+
+      return OpenIdConnect.decodeBodyFromToken(token);
+    }
+  }], [{
+    key: 'decodeBodyFromToken',
+    value: function decodeBodyFromToken(token) {
+      try {
+        var bodyBase64Url = token.split('.')[1];
+
+        var bodyBase64 = bodyBase64Url.replace(/-/g, '+').replace(/_/g, '/'),
+            bodyDecoded = window.atob(bodyBase64);
+
+        return JSON.parse(bodyDecoded);
+      } catch (ex) {
+        return undefined;
+      }
+    }
+  }]);
+
+  return OpenIdConnect;
+}();
+
+module.exports = OpenIdConnect;
+
+/***/ }),
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -207,17 +530,17 @@ module.exports = authentication;
 
 var events = __webpack_require__(1);
 
-var merge = __webpack_require__(41),
+var merge = __webpack_require__(11),
     Promise = __webpack_require__(0).Promise;
 
-var ConfigurationWatcher = __webpack_require__(8),
-    getEventsApi = __webpack_require__(19),
-    getReadModelApi = __webpack_require__(20),
-    getWriteModelApi = __webpack_require__(21),
-    ListStore = __webpack_require__(27).ListStore,
-    ModelStore = __webpack_require__(9),
-    NetworkConnection = __webpack_require__(10),
-    wires = __webpack_require__(30);
+var ConfigurationWatcher = __webpack_require__(12),
+    getEventsApi = __webpack_require__(15),
+    getReadModelApi = __webpack_require__(19),
+    getWriteModelApi = __webpack_require__(26),
+    ListStore = __webpack_require__(34).ListStore,
+    ModelStore = __webpack_require__(36),
+    NetworkConnection = __webpack_require__(39),
+    wires = __webpack_require__(40);
 
 var EventEmitter = events.EventEmitter;
 
@@ -377,13 +700,13 @@ var getApp = function getApp(options) {
 module.exports = getApp;
 
 /***/ }),
-/* 7 */
+/* 11 */
 /***/ (function(module, exports) {
 
-module.exports = require("is-node");
+module.exports = require("lodash/merge");
 
 /***/ }),
-/* 8 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -401,8 +724,8 @@ var events = __webpack_require__(1);
 
 var Promise = __webpack_require__(0).Promise;
 
-var localStorage = __webpack_require__(25),
-    request = __webpack_require__(2);
+var localStorage = __webpack_require__(13),
+    request = __webpack_require__(3);
 
 var EventEmitter = events.EventEmitter;
 
@@ -596,461 +919,88 @@ var ConfigurationWatcher = function (_EventEmitter) {
 module.exports = ConfigurationWatcher;
 
 /***/ }),
-/* 9 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var eachSeries = __webpack_require__(32),
-    parallel = __webpack_require__(33);
+var polyfill = {
+  data: {},
 
-var ModelStore = function ModelStore() {
-  this.stores = {};
-};
-
-ModelStore.prototype.initialize = function (options, callback) {
-  var _this = this;
-
-  if (!options) {
-    throw new Error('Options are missing.');
-  }
-  if (!options.stores) {
-    throw new Error('Stores are missing.');
-  }
-  if (!callback) {
-    throw new Error('Callback is missing.');
-  }
-
-  this.stores = options.stores;
-
-  parallel(Object.keys(this.stores).map(function (storeType) {
-    return function (done) {
-      return _this.stores[storeType].initialize({}, done);
-    };
-  }), function (err) {
-    if (err) {
-      return callback(err);
+  setItem: function setItem(key, value) {
+    this.data[key] = String(value);
+  },
+  getItem: function getItem(key) {
+    if (!this.data.hasOwnProperty(key)) {
+      return undefined;
     }
 
-    callback(null);
-  });
+    return this.data[key];
+  },
+  removeItem: function removeItem(key) {
+    Reflect.deleteProperty(this.data, key);
+  },
+  clear: function clear() {
+    this.data = {};
+  }
 };
 
-ModelStore.prototype.processEvents = function (events, callback) {
-  var _this2 = this;
+/* eslint-disable no-undef */
+var localStorage = typeof window !== 'undefined' && window.localStorage ? window.localStorage : polyfill;
+/* eslint-enable no-undef */
 
-  if (!events) {
-    throw new Error('Events are missing.');
-  }
-  if (!callback) {
-    throw new Error('Callback is missing.');
-  }
-
-  if (events.length === 0) {
-    return callback(null);
-  }
-
-  var storeSpecificEvents = {};
-
-  Object.keys(this.stores).forEach(function (storeType) {
-    storeSpecificEvents[storeType] = [];
-  });
-
-  events.forEach(function (event) {
-    var modelType = event.context.name;
-
-    if (!storeSpecificEvents[modelType]) {
-      return;
-    }
-
-    storeSpecificEvents[modelType].push(event);
-  });
-
-  parallel(Object.keys(this.stores).map(function (storeType) {
-    return function (done) {
-      return _this2.processEventsInStore(_this2.stores[storeType], storeSpecificEvents[storeType], done);
-    };
-  }), callback);
-};
-
-ModelStore.prototype.processEventsInStore = function (store, events, callback) {
-  if (!store) {
-    throw new Error('Store is missing.');
-  }
-  if (!events) {
-    throw new Error('Events are missing.');
-  }
-  if (!callback) {
-    throw new Error('Callback is missing.');
-  }
-
-  if (events.length === 0) {
-    return callback(null);
-  }
-
-  eachSeries(events, function (event, done) {
-    store[event.name]({
-      modelName: event.aggregate.name,
-      selector: event.data.selector,
-      payload: event.data.payload
-    }, done);
-  }, callback);
-};
-
-ModelStore.prototype.read = function (options, callback) {
-  if (!options) {
-    throw new Error('Options are missing.');
-  }
-  if (!options.modelType) {
-    throw new Error('Model type is missing.');
-  }
-  if (!options.modelName) {
-    throw new Error('Model name is missing.');
-  }
-  if (!callback) {
-    throw new Error('Callback is missing.');
-  }
-
-  options.query = options.query || {};
-
-  this.stores[options.modelType].read(options, callback);
-};
-
-ModelStore.prototype.readOne = function (options, callback) {
-  if (!options) {
-    throw new Error('Options are missing.');
-  }
-  if (!options.modelType) {
-    throw new Error('Model type is missing.');
-  }
-  if (!options.modelName) {
-    throw new Error('Model name is missing.');
-  }
-  if (!options.query) {
-    throw new Error('Query is missing.');
-  }
-  if (!options.query.where) {
-    throw new Error('Where is missing.');
-  }
-  if (!callback) {
-    throw new Error('Callback is missing.');
-  }
-
-  this.read({
-    modelType: options.modelType,
-    modelName: options.modelName,
-    query: {
-      where: options.query.where,
-      take: 1
-    }
-  }, function (err, model) {
-    if (err) {
-      return callback(err);
-    }
-
-    var items = [];
-    var onData = function onData(item) {
-      items.push(item);
-    };
-    var onEnd = function onEnd() {
-      model.stream.removeListener('data', onData);
-      model.stream.removeListener('end', onEnd);
-
-      var firstItem = items[0];
-
-      if (!firstItem) {
-        return callback(new Error('Item not found.'));
-      }
-      callback(null, firstItem);
-    };
-
-    model.stream.on('data', onData);
-    model.stream.once('end', onEnd);
-  });
-};
-
-module.exports = ModelStore;
+module.exports = localStorage;
 
 /***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
+/* 14 */
+/***/ (function(module, exports) {
 
-"use strict";
-
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var events = __webpack_require__(1);
-
-var request = __webpack_require__(2);
-
-var EventEmitter = events.EventEmitter;
-
-var NetworkConnection = function (_EventEmitter) {
-  _inherits(NetworkConnection, _EventEmitter);
-
-  function NetworkConnection(options) {
-    _classCallCheck(this, NetworkConnection);
-
-    var _this = _possibleConstructorReturn(this, (NetworkConnection.__proto__ || Object.getPrototypeOf(NetworkConnection)).call(this));
-
-    if (!options) {
-      throw new Error('Options are missing.');
-    }
-    if (!options.host) {
-      throw new Error('Host is missing.');
-    }
-    if (!options.port) {
-      throw new Error('Port is missing.');
-    }
-
-    _this.host = options.host;
-    _this.port = options.port;
-
-    _this.isOnline = undefined;
-    _this.wasOnline = undefined;
-    _this.interval = 2 * 1000;
-    _this.timeoutId = undefined;
-
-    _this.test();
-    return _this;
-  }
-
-  _createClass(NetworkConnection, [{
-    key: 'online',
-    value: function online() {
-      this.wasOnline = this.isOnline;
-      this.isOnline = true;
-
-      if (this.isOnline !== this.wasOnline) {
-        this.emit('online');
-      }
-    }
-  }, {
-    key: 'offline',
-    value: function offline() {
-      this.wasOnline = this.isOnline;
-      this.isOnline = false;
-
-      if (this.isOnline !== this.wasOnline) {
-        this.emit('offline');
-      }
-    }
-  }, {
-    key: 'test',
-    value: function test() {
-      var _this2 = this;
-
-      var host = this.host,
-          port = this.port;
-
-
-      request({
-        method: 'GET',
-        hostname: host,
-        port: port,
-        path: '/v1/ping?_=' + Date.now(),
-        withCredentials: false
-      }, function (err) {
-        if (err) {
-          _this2.offline();
-        } else {
-          _this2.online();
-        }
-
-        clearTimeout(_this2.timeoutId);
-        _this2.timeoutId = setTimeout(function () {
-          return _this2.test();
-        }, _this2.interval);
-      });
-    }
-  }, {
-    key: 'destroy',
-    value: function destroy() {
-      clearTimeout(this.timeoutId);
-    }
-  }]);
-
-  return NetworkConnection;
-}(EventEmitter);
-
-module.exports = NetworkConnection;
+module.exports = require("https");
 
 /***/ }),
-/* 11 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var flatten = __webpack_require__(40),
-    parseDuration = __webpack_require__(42);
+var EventsAggregate = __webpack_require__(16);
 
-var errors = __webpack_require__(24);
-
-var defaultTimeoutDuration = parseDuration('120s'),
-    disabledTimeoutDuration = parseDuration('0s');
-
-var CommandRunner = function CommandRunner(options) {
-  var _this = this;
-
+var getEventsApi = function getEventsApi(options) {
   if (!options) {
     throw new Error('Options are missing.');
-  }
-  if (!options.app) {
-    throw new Error('App is missing.');
   }
   if (!options.wire) {
     throw new Error('Wire is missing.');
   }
-  if (!options.command) {
-    throw new Error('Command is missing.');
+  if (!options.writeModel) {
+    throw new Error('Write model is missing.');
   }
 
-  var app = options.app,
-      wire = options.wire,
-      command = options.command;
+  var wire = options.wire,
+      writeModel = options.writeModel;
 
 
-  this.app = app;
-  this.command = command;
-  this.aggregate = app[command.context.name][command.aggregate.name];
-
-  this.callbacks = {
-    delivered: function delivered() {},
-    await: function _await() {},
-    failed: function failed(err) {
-      throw err;
-    },
-    timeout: function timeout() {}
+  var api = {
+    events: new EventsAggregate({ wire: wire, writeModel: writeModel })
   };
 
-  this.cancelEvents = undefined;
-  this.callbacks.timeout.duration = disabledTimeoutDuration;
-
-  // This needs to be deferred to the next tick so that the user has a chance
-  // to attach the various functions such as delivered, await, failed and timeout
-  // to this instance.
-  process.nextTick(function () {
-    app.events.observe({
-      where: {
-        type: 'domain',
-        metadata: { correlationId: _this.command.metadata.correlationId }
-      }
-    }).failed(function (err) {
-      _this.clearEventsAndTimers();
-      _this.fail(new errors.CommandFailed('Failed to deliver command.', err), command);
-    }).started(function (cancel) {
-      _this.cancelEvents = cancel;
-
-      wire.sendCommand(command).then(function () {
-        process.nextTick(function () {
-          _this.callbacks.delivered(command);
-
-          _this.callbacks.timeout.id = setTimeout(function () {
-            _this.clearEventsAndTimers();
-            _this.callbacks.timeout(command);
-          }, _this.callbacks.timeout.duration);
-        });
-      }).catch(function (err) {
-        _this.clearEventsAndTimers();
-        _this.fail(new errors.CommandFailed('Failed to deliver command.', err), command);
-      });
-    }).received(function (event) {
-      _this.handleEvent(event);
-    });
-  });
+  return api;
 };
 
-CommandRunner.prototype.fail = function (err, command) {
-  if (!this.callbacks.failed) {
-    return;
-  }
-
-  this.callbacks.failed(err, command);
-
-  // Remove failed callback to avoid that it is being called twice for the same
-  // command.
-  this.callbacks.failed = undefined;
-};
-
-CommandRunner.prototype.handleEvent = function (event) {
-  if (/Rejected$/.test(event.name) || /Failed$/.test(event.name)) {
-    this.clearEventsAndTimers();
-    this.fail(new errors.CommandRejected(event.data.reason), this.command);
-
-    return;
-  }
-
-  if (this.callbacks.await[event.name]) {
-    this.clearEventsAndTimers();
-    this.callbacks.await[event.name](event, this.command);
-  }
-};
-
-CommandRunner.prototype.clearEventsAndTimers = function () {
-  clearTimeout(this.callbacks.timeout.id);
-  if (this.cancelEvents) {
-    this.cancelEvents();
-  }
-};
-
-CommandRunner.prototype.delivered = function (callback) {
-  this.callbacks.delivered = callback;
-
-  return this;
-};
-
-CommandRunner.prototype.await = function (eventNames, callback) {
-  var _this2 = this;
-
-  if (this.callbacks.timeout.duration === 0) {
-    this.callbacks.timeout.duration = defaultTimeoutDuration;
-  }
-
-  flatten([eventNames]).forEach(function (eventName) {
-    _this2.callbacks.await[eventName] = callback;
-  });
-
-  return this;
-};
-
-CommandRunner.prototype.failed = function (callback) {
-  if (this.callbacks.timeout.duration === 0) {
-    this.callbacks.timeout.duration = defaultTimeoutDuration;
-  }
-
-  this.callbacks.failed = callback;
-
-  return this;
-};
-
-CommandRunner.prototype.timeout = function (duration, callback) {
-  this.callbacks.timeout = callback;
-  this.callbacks.timeout.duration = parseDuration(duration);
-
-  return this;
-};
-
-module.exports = CommandRunner;
+module.exports = getEventsApi;
 
 /***/ }),
-/* 12 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var assign = __webpack_require__(39);
+var assign = __webpack_require__(17);
 
-var isEventIn = __webpack_require__(13);
+var isEventIn = __webpack_require__(18);
 
 var EventsAggregate = function EventsAggregate(options) {
   if (!options) {
@@ -1155,7 +1105,13 @@ EventsAggregate.prototype.observe = function (options) {
 module.exports = EventsAggregate;
 
 /***/ }),
-/* 13 */
+/* 17 */
+/***/ (function(module, exports) {
+
+module.exports = require("lodash/assign");
+
+/***/ }),
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1230,7 +1186,97 @@ var isEventIn = function isEventIn(writeModel, event) {
 module.exports = isEventIn;
 
 /***/ }),
-/* 14 */
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var createReadModelAggregate = __webpack_require__(20);
+
+var getReadModelApi = function getReadModelApi(options) {
+  if (!options) {
+    throw new Error('Options are missing.');
+  }
+  if (!options.wire) {
+    throw new Error('Wire is missing.');
+  }
+  if (!options.readModel) {
+    throw new Error('Read model is missing.');
+  }
+  if (!options.modelStore) {
+    throw new Error('Model store is missing.');
+  }
+
+  var readModel = options.readModel,
+      modelStore = options.modelStore,
+      wire = options.wire;
+
+
+  var api = {};
+
+  Object.keys(readModel).forEach(function (modelType) {
+    api[modelType] = {};
+
+    Object.keys(readModel[modelType]).forEach(function (modelName) {
+      api[modelType][modelName] = createReadModelAggregate({
+        modelStore: modelStore,
+        modelType: modelType,
+        modelName: modelName,
+        wire: wire
+      });
+    });
+  });
+
+  return api;
+};
+
+module.exports = getReadModelApi;
+
+/***/ }),
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var ListAggregate = __webpack_require__(21);
+
+var create = function create(options) {
+  if (!options) {
+    throw new Error('Options are missing.');
+  }
+  if (!options.wire) {
+    throw new Error('Wire is missing.');
+  }
+  if (!options.modelStore) {
+    throw new Error('Model store is missing.');
+  }
+  if (!options.modelType) {
+    throw new Error('Model type is missing.');
+  }
+  if (!options.modelName) {
+    throw new Error('Model name is missing.');
+  }
+
+  var modelName = options.modelName,
+      modelStore = options.modelStore,
+      modelType = options.modelType,
+      wire = options.wire;
+
+
+  switch (modelType) {
+    case 'lists':
+      return new ListAggregate.Readable({ wire: wire, modelStore: modelStore, modelName: modelName });
+    default:
+      throw new Error('Invalid operation.');
+  }
+};
+
+module.exports = create;
+
+/***/ }),
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1238,10 +1284,10 @@ module.exports = isEventIn;
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-var datasette = __webpack_require__(35);
+var datasette = __webpack_require__(22);
 
-var areDifferent = __webpack_require__(15),
-    readSnapshot = __webpack_require__(17);
+var areDifferent = __webpack_require__(23),
+    readSnapshot = __webpack_require__(24);
 
 var Readable = function Readable(options) {
   if (!options) {
@@ -1473,7 +1519,13 @@ Readable.prototype.readAndObserve = function (query) {
 module.exports = { Readable: Readable };
 
 /***/ }),
-/* 15 */
+/* 22 */
+/***/ (function(module, exports) {
+
+module.exports = require("datasette");
+
+/***/ }),
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1507,55 +1559,13 @@ var areDifferent = function areDifferent(left, right) {
 module.exports = areDifferent;
 
 /***/ }),
-/* 16 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var ListAggregate = __webpack_require__(14);
-
-var create = function create(options) {
-  if (!options) {
-    throw new Error('Options are missing.');
-  }
-  if (!options.wire) {
-    throw new Error('Wire is missing.');
-  }
-  if (!options.modelStore) {
-    throw new Error('Model store is missing.');
-  }
-  if (!options.modelType) {
-    throw new Error('Model type is missing.');
-  }
-  if (!options.modelName) {
-    throw new Error('Model name is missing.');
-  }
-
-  var modelName = options.modelName,
-      modelStore = options.modelStore,
-      modelType = options.modelType,
-      wire = options.wire;
-
-
-  switch (modelType) {
-    case 'lists':
-      return new ListAggregate.Readable({ wire: wire, modelStore: modelStore, modelName: modelName });
-    default:
-      throw new Error('Invalid operation.');
-  }
-};
-
-module.exports = create;
-
-/***/ }),
-/* 17 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var toArray = __webpack_require__(43);
+var toArray = __webpack_require__(25);
 
 var readSnapshot = function readSnapshot(options, callback) {
   if (!options) {
@@ -1596,16 +1606,73 @@ var readSnapshot = function readSnapshot(options, callback) {
 module.exports = readSnapshot;
 
 /***/ }),
-/* 18 */
+/* 25 */
+/***/ (function(module, exports) {
+
+module.exports = require("streamtoarray");
+
+/***/ }),
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Command = __webpack_require__(34).Command,
-    uuid = __webpack_require__(3);
+var buildCommandApi = __webpack_require__(27);
 
-var CommandRunner = __webpack_require__(11);
+var getWriteModelApi = function getWriteModelApi(options) {
+  if (!options) {
+    throw new Error('Options are missing.');
+  }
+  if (!options.app) {
+    throw new Error('App is missing.');
+  }
+  if (!options.wire) {
+    throw new Error('Wire is missing.');
+  }
+  if (!options.writeModel) {
+    throw new Error('Write model is missing.');
+  }
+
+  var app = options.app,
+      wire = options.wire,
+      writeModel = options.writeModel;
+
+
+  var api = {};
+
+  Object.keys(writeModel).forEach(function (contextName) {
+    api[contextName] = {};
+
+    Object.keys(writeModel[contextName]).forEach(function (aggregateName) {
+      api[contextName][aggregateName] = function (aggregateId) {
+        var commands = {};
+
+        Object.keys(writeModel[contextName][aggregateName].commands).forEach(function (commandName) {
+          commands[commandName] = buildCommandApi({ api: api, app: app, wire: wire, contextName: contextName, aggregateName: aggregateName, aggregateId: aggregateId, commandName: commandName });
+        });
+
+        return commands;
+      };
+    });
+  });
+
+  return api;
+};
+
+module.exports = getWriteModelApi;
+
+/***/ }),
+/* 27 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var Command = __webpack_require__(28).Command,
+    uuid = __webpack_require__(2);
+
+var CommandRunner = __webpack_require__(29);
 
 var buildCommandApi = function buildCommandApi(options) {
   if (!options) {
@@ -1662,96 +1729,29 @@ var buildCommandApi = function buildCommandApi(options) {
 module.exports = buildCommandApi;
 
 /***/ }),
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
+/* 28 */
+/***/ (function(module, exports) {
 
-"use strict";
-
-
-var EventsAggregate = __webpack_require__(12);
-
-var getEventsApi = function getEventsApi(options) {
-  if (!options) {
-    throw new Error('Options are missing.');
-  }
-  if (!options.wire) {
-    throw new Error('Wire is missing.');
-  }
-  if (!options.writeModel) {
-    throw new Error('Write model is missing.');
-  }
-
-  var wire = options.wire,
-      writeModel = options.writeModel;
-
-
-  var api = {
-    events: new EventsAggregate({ wire: wire, writeModel: writeModel })
-  };
-
-  return api;
-};
-
-module.exports = getEventsApi;
+module.exports = require("commands-events");
 
 /***/ }),
-/* 20 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var createReadModelAggregate = __webpack_require__(16);
+var flatten = __webpack_require__(30),
+    parseDuration = __webpack_require__(31);
 
-var getReadModelApi = function getReadModelApi(options) {
-  if (!options) {
-    throw new Error('Options are missing.');
-  }
-  if (!options.wire) {
-    throw new Error('Wire is missing.');
-  }
-  if (!options.readModel) {
-    throw new Error('Read model is missing.');
-  }
-  if (!options.modelStore) {
-    throw new Error('Model store is missing.');
-  }
+var errors = __webpack_require__(32);
 
-  var readModel = options.readModel,
-      modelStore = options.modelStore,
-      wire = options.wire;
+var defaultTimeoutDuration = parseDuration('120s'),
+    disabledTimeoutDuration = parseDuration('0s');
 
+var CommandRunner = function CommandRunner(options) {
+  var _this = this;
 
-  var api = {};
-
-  Object.keys(readModel).forEach(function (modelType) {
-    api[modelType] = {};
-
-    Object.keys(readModel[modelType]).forEach(function (modelName) {
-      api[modelType][modelName] = createReadModelAggregate({
-        modelStore: modelStore,
-        modelType: modelType,
-        modelName: modelName,
-        wire: wire
-      });
-    });
-  });
-
-  return api;
-};
-
-module.exports = getReadModelApi;
-
-/***/ }),
-/* 21 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var buildCommandApi = __webpack_require__(18);
-
-var getWriteModelApi = function getWriteModelApi(options) {
   if (!options) {
     throw new Error('Options are missing.');
   }
@@ -1761,338 +1761,181 @@ var getWriteModelApi = function getWriteModelApi(options) {
   if (!options.wire) {
     throw new Error('Wire is missing.');
   }
-  if (!options.writeModel) {
-    throw new Error('Write model is missing.');
+  if (!options.command) {
+    throw new Error('Command is missing.');
   }
 
   var app = options.app,
       wire = options.wire,
-      writeModel = options.writeModel;
+      command = options.command;
 
 
-  var api = {};
+  this.app = app;
+  this.command = command;
+  this.aggregate = app[command.context.name][command.aggregate.name];
 
-  Object.keys(writeModel).forEach(function (contextName) {
-    api[contextName] = {};
+  this.callbacks = {
+    delivered: function delivered() {},
+    await: function _await() {},
+    failed: function failed(err) {
+      throw err;
+    },
+    timeout: function timeout() {}
+  };
 
-    Object.keys(writeModel[contextName]).forEach(function (aggregateName) {
-      api[contextName][aggregateName] = function (aggregateId) {
-        var commands = {};
+  this.cancelEvents = undefined;
+  this.callbacks.timeout.duration = disabledTimeoutDuration;
 
-        Object.keys(writeModel[contextName][aggregateName].commands).forEach(function (commandName) {
-          commands[commandName] = buildCommandApi({ api: api, app: app, wire: wire, contextName: contextName, aggregateName: aggregateName, aggregateId: aggregateId, commandName: commandName });
+  // This needs to be deferred to the next tick so that the user has a chance
+  // to attach the various functions such as delivered, await, failed and timeout
+  // to this instance.
+  process.nextTick(function () {
+    app.events.observe({
+      where: {
+        type: 'domain',
+        metadata: { correlationId: _this.command.metadata.correlationId }
+      }
+    }).failed(function (err) {
+      _this.clearEventsAndTimers();
+      _this.fail(new errors.CommandFailed('Failed to deliver command.', err), command);
+    }).started(function (cancel) {
+      _this.cancelEvents = cancel;
+
+      wire.sendCommand(command).then(function () {
+        process.nextTick(function () {
+          _this.callbacks.delivered(command);
+
+          _this.callbacks.timeout.id = setTimeout(function () {
+            _this.clearEventsAndTimers();
+            _this.callbacks.timeout(command);
+          }, _this.callbacks.timeout.duration);
         });
-
-        return commands;
-      };
+      }).catch(function (err) {
+        _this.clearEventsAndTimers();
+        _this.fail(new errors.CommandFailed('Failed to deliver command.', err), command);
+      });
+    }).received(function (event) {
+      _this.handleEvent(event);
     });
   });
-
-  return api;
 };
 
-module.exports = getWriteModelApi;
-
-/***/ }),
-/* 22 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var None = function () {
-  function None() {
-    _classCallCheck(this, None);
+CommandRunner.prototype.fail = function (err, command) {
+  if (!this.callbacks.failed) {
+    return;
   }
 
-  _createClass(None, [{
-    key: 'login',
-    value: function login() {
-      this.onError(new Error('Invalid operation.'));
-    }
-  }, {
-    key: 'logout',
-    value: function logout() {
-      this.onError(new Error('Invalid operation.'));
-    }
+  this.callbacks.failed(err, command);
 
-    /* eslint-disable class-methods-use-this */
+  // Remove failed callback to avoid that it is being called twice for the same
+  // command.
+  this.callbacks.failed = undefined;
+};
 
-  }, {
-    key: 'willAuthenticate',
-    value: function willAuthenticate(proceed) {
-      proceed();
-    }
-  }, {
-    key: 'onAuthenticating',
-    value: function onAuthenticating() {}
-  }, {
-    key: 'onAuthenticated',
-    value: function onAuthenticated() {}
-  }, {
-    key: 'onError',
-    value: function onError(err) {
-      throw err;
-    }
-  }, {
-    key: 'isLoggedIn',
-    value: function isLoggedIn() {
-      return false;
-    }
-  }, {
-    key: 'getToken',
-    value: function getToken() {
-      return undefined;
-    }
-  }, {
-    key: 'getProfile',
-    value: function getProfile() {
-      return undefined;
-    }
-    /* eslint-enable class-methods-use-this */
+CommandRunner.prototype.handleEvent = function (event) {
+  if (/Rejected$/.test(event.name) || /Failed$/.test(event.name)) {
+    this.clearEventsAndTimers();
+    this.fail(new errors.CommandRejected(event.data.reason), this.command);
 
-  }]);
-
-  return None;
-}();
-
-module.exports = None;
-
-/***/ }),
-/* 23 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-/* global window */
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var uuid = __webpack_require__(3);
-
-var OpenIdConnect = function () {
-  function OpenIdConnect(options) {
-    _classCallCheck(this, OpenIdConnect);
-
-    if (!options) {
-      throw new Error('Options are missing.');
-    }
-    if (!options.identityProviderUrl) {
-      throw new Error('Identity provider url is missing.');
-    }
-    if (!options.clientId) {
-      throw new Error('Client id is missing.');
-    }
-
-    this.identityProviderUrl = options.identityProviderUrl;
-    this.clientId = options.clientId;
-    this.redirectUrl = options.redirectUrl || window.location.protocol + '//' + window.location.host;
-    this.responseType = 'id_token token';
-    this.scope = ('openid ' + (options.scope || '')).trim();
-    this.strictMode = options.strictMode !== false;
-
-    this.onAuthenticating = options.onAuthenticating || this.onAuthenticating;
-    this.onAuthenticated = options.onAuthenticated || this.onAuthenticated;
-    this.onError = options.onError || this.onError;
-
-    // Only set the token if a hash is given, and if the hash contains a token.
-    this.handleReturnFromRedirect();
+    return;
   }
 
-  _createClass(OpenIdConnect, [{
-    key: 'onAuthenticating',
+  if (this.callbacks.await[event.name]) {
+    this.clearEventsAndTimers();
+    this.callbacks.await[event.name](event, this.command);
+  }
+};
 
+CommandRunner.prototype.clearEventsAndTimers = function () {
+  clearTimeout(this.callbacks.timeout.id);
+  if (this.cancelEvents) {
+    this.cancelEvents();
+  }
+};
 
-    /* eslint-disable class-methods-use-this */
-    value: function onAuthenticating(proceed) {
-      proceed();
-    }
-  }, {
-    key: 'onAuthenticated',
-    value: function onAuthenticated() {}
-  }, {
-    key: 'onError',
-    value: function onError(err) {
-      throw err;
-    }
-    /* eslint-enable class-methods-use-this */
+CommandRunner.prototype.delivered = function (callback) {
+  this.callbacks.delivered = callback;
 
-  }, {
-    key: 'getKey',
-    value: function getKey() {
-      return 'id_token_' + this.clientId;
-    }
-  }, {
-    key: 'handleReturnFromRedirect',
-    value: function handleReturnFromRedirect() {
-      var nonce = window.localStorage.getItem('nonce'),
-          previousUrl = window.localStorage.getItem('redirectTo');
+  return this;
+};
 
-      window.localStorage.removeItem('nonce');
-      window.localStorage.removeItem('redirectTo');
+CommandRunner.prototype.await = function (eventNames, callback) {
+  var _this2 = this;
 
-      if (!window.location.hash) {
-        return;
-      }
+  if (this.callbacks.timeout.duration === 0) {
+    this.callbacks.timeout.duration = defaultTimeoutDuration;
+  }
 
-      var hash = window.location.hash;
-      var token = void 0;
+  flatten([eventNames]).forEach(function (eventName) {
+    _this2.callbacks.await[eventName] = callback;
+  });
 
-      try {
-        token = hash.match(/(#|&)id_token=([^&]+)/)[2];
-      } catch (ex) {
-        return;
-      }
+  return this;
+};
 
-      if (this.strictMode && !nonce) {
-        return this.onError(new Error('Nonce is missing.'));
-      }
+CommandRunner.prototype.failed = function (callback) {
+  if (this.callbacks.timeout.duration === 0) {
+    this.callbacks.timeout.duration = defaultTimeoutDuration;
+  }
 
-      var body = OpenIdConnect.decodeBodyFromToken(token);
+  this.callbacks.failed = callback;
 
-      if (!body) {
-        return this.onError(new Error('Invalid token.'));
-      }
-      if (this.strictMode && !body.jti) {
-        return this.onError(new Error('Jti is missing.'));
-      }
-      if (this.strictMode && body.jti !== nonce) {
-        return this.onError(new Error('Nonce and jti mismatch.'));
-      }
+  return this;
+};
 
-      window.localStorage.setItem(this.getKey(), token);
-      window.location.replace(previousUrl);
+CommandRunner.prototype.timeout = function (duration, callback) {
+  this.callbacks.timeout = callback;
+  this.callbacks.timeout.duration = parseDuration(duration);
 
-      this.onAuthenticated(this.getProfile());
-    }
-  }, {
-    key: 'login',
-    value: function login() {
-      var _this = this;
+  return this;
+};
 
-      this.onAuthenticating(function () {
-        var clientId = window.encodeURIComponent(_this.clientId),
-            identityProviderUrl = _this.identityProviderUrl,
-            redirectUrl = window.encodeURIComponent(_this.redirectUrl),
-            responseType = window.encodeURIComponent(_this.responseType),
-            scope = window.encodeURIComponent(_this.scope);
-
-        var nonce = uuid();
-
-        window.localStorage.setItem('nonce', nonce);
-        window.localStorage.setItem('redirectTo', window.location.href);
-        window.location.href = identityProviderUrl + '?client_id=' + clientId + '&redirect_uri=' + redirectUrl + '&scope=' + scope + '&response_type=' + responseType + '&nonce=' + nonce;
-      });
-    }
-  }, {
-    key: 'logout',
-    value: function logout() {
-      window.localStorage.removeItem(this.getKey());
-    }
-  }, {
-    key: 'isLoggedIn',
-    value: function isLoggedIn() {
-      return Boolean(window.localStorage.getItem(this.getKey()));
-    }
-  }, {
-    key: 'getToken',
-    value: function getToken() {
-      var token = window.localStorage.getItem(this.getKey());
-
-      if (!token) {
-        return;
-      }
-
-      return token;
-    }
-  }, {
-    key: 'getProfile',
-    value: function getProfile() {
-      var token = this.getToken();
-
-      if (!token) {
-        return;
-      }
-
-      return OpenIdConnect.decodeBodyFromToken(token);
-    }
-  }], [{
-    key: 'decodeBodyFromToken',
-    value: function decodeBodyFromToken(token) {
-      try {
-        var bodyBase64Url = token.split('.')[1];
-
-        var bodyBase64 = bodyBase64Url.replace(/-/g, '+').replace(/_/g, '/'),
-            bodyDecoded = window.atob(bodyBase64);
-
-        return JSON.parse(bodyDecoded);
-      } catch (ex) {
-        return undefined;
-      }
-    }
-  }]);
-
-  return OpenIdConnect;
-}();
-
-module.exports = OpenIdConnect;
+module.exports = CommandRunner;
 
 /***/ }),
-/* 24 */
+/* 30 */
+/***/ (function(module, exports) {
+
+module.exports = require("lodash/flatten");
+
+/***/ }),
+/* 31 */
+/***/ (function(module, exports) {
+
+module.exports = require("parse-duration");
+
+/***/ }),
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var defekt = __webpack_require__(36);
+var defekt = __webpack_require__(33);
 
 var errors = defekt(['CommandFailed', 'CommandRejected']);
 
 module.exports = errors;
 
 /***/ }),
-/* 25 */
+/* 33 */
+/***/ (function(module, exports) {
+
+module.exports = require("defekt");
+
+/***/ }),
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var polyfill = {
-  data: {},
+var ListStore = __webpack_require__(35);
 
-  setItem: function setItem(key, value) {
-    this.data[key] = String(value);
-  },
-  getItem: function getItem(key) {
-    if (!this.data.hasOwnProperty(key)) {
-      return undefined;
-    }
-
-    return this.data[key];
-  },
-  removeItem: function removeItem(key) {
-    Reflect.deleteProperty(this.data, key);
-  },
-  clear: function clear() {
-    this.data = {};
-  }
-};
-
-/* eslint-disable no-undef */
-var localStorage = typeof window !== 'undefined' && window.localStorage ? window.localStorage : polyfill;
-/* eslint-enable no-undef */
-
-module.exports = localStorage;
+module.exports = { ListStore: ListStore };
 
 /***/ }),
-/* 26 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2151,18 +1994,324 @@ ListStore.prototype.read = function (options, callback) {
 module.exports = ListStore;
 
 /***/ }),
-/* 27 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var ListStore = __webpack_require__(26);
+var eachSeries = __webpack_require__(37),
+    parallel = __webpack_require__(38);
 
-module.exports = { ListStore: ListStore };
+var ModelStore = function ModelStore() {
+  this.stores = {};
+};
+
+ModelStore.prototype.initialize = function (options, callback) {
+  var _this = this;
+
+  if (!options) {
+    throw new Error('Options are missing.');
+  }
+  if (!options.stores) {
+    throw new Error('Stores are missing.');
+  }
+  if (!callback) {
+    throw new Error('Callback is missing.');
+  }
+
+  this.stores = options.stores;
+
+  parallel(Object.keys(this.stores).map(function (storeType) {
+    return function (done) {
+      return _this.stores[storeType].initialize({}, done);
+    };
+  }), function (err) {
+    if (err) {
+      return callback(err);
+    }
+
+    callback(null);
+  });
+};
+
+ModelStore.prototype.processEvents = function (events, callback) {
+  var _this2 = this;
+
+  if (!events) {
+    throw new Error('Events are missing.');
+  }
+  if (!callback) {
+    throw new Error('Callback is missing.');
+  }
+
+  if (events.length === 0) {
+    return callback(null);
+  }
+
+  var storeSpecificEvents = {};
+
+  Object.keys(this.stores).forEach(function (storeType) {
+    storeSpecificEvents[storeType] = [];
+  });
+
+  events.forEach(function (event) {
+    var modelType = event.context.name;
+
+    if (!storeSpecificEvents[modelType]) {
+      return;
+    }
+
+    storeSpecificEvents[modelType].push(event);
+  });
+
+  parallel(Object.keys(this.stores).map(function (storeType) {
+    return function (done) {
+      return _this2.processEventsInStore(_this2.stores[storeType], storeSpecificEvents[storeType], done);
+    };
+  }), callback);
+};
+
+ModelStore.prototype.processEventsInStore = function (store, events, callback) {
+  if (!store) {
+    throw new Error('Store is missing.');
+  }
+  if (!events) {
+    throw new Error('Events are missing.');
+  }
+  if (!callback) {
+    throw new Error('Callback is missing.');
+  }
+
+  if (events.length === 0) {
+    return callback(null);
+  }
+
+  eachSeries(events, function (event, done) {
+    store[event.name]({
+      modelName: event.aggregate.name,
+      selector: event.data.selector,
+      payload: event.data.payload
+    }, done);
+  }, callback);
+};
+
+ModelStore.prototype.read = function (options, callback) {
+  if (!options) {
+    throw new Error('Options are missing.');
+  }
+  if (!options.modelType) {
+    throw new Error('Model type is missing.');
+  }
+  if (!options.modelName) {
+    throw new Error('Model name is missing.');
+  }
+  if (!callback) {
+    throw new Error('Callback is missing.');
+  }
+
+  options.query = options.query || {};
+
+  this.stores[options.modelType].read(options, callback);
+};
+
+ModelStore.prototype.readOne = function (options, callback) {
+  if (!options) {
+    throw new Error('Options are missing.');
+  }
+  if (!options.modelType) {
+    throw new Error('Model type is missing.');
+  }
+  if (!options.modelName) {
+    throw new Error('Model name is missing.');
+  }
+  if (!options.query) {
+    throw new Error('Query is missing.');
+  }
+  if (!options.query.where) {
+    throw new Error('Where is missing.');
+  }
+  if (!callback) {
+    throw new Error('Callback is missing.');
+  }
+
+  this.read({
+    modelType: options.modelType,
+    modelName: options.modelName,
+    query: {
+      where: options.query.where,
+      take: 1
+    }
+  }, function (err, model) {
+    if (err) {
+      return callback(err);
+    }
+
+    var items = [];
+    var onData = function onData(item) {
+      items.push(item);
+    };
+    var onEnd = function onEnd() {
+      model.stream.removeListener('data', onData);
+      model.stream.removeListener('end', onEnd);
+
+      var firstItem = items[0];
+
+      if (!firstItem) {
+        return callback(new Error('Item not found.'));
+      }
+      callback(null, firstItem);
+    };
+
+    model.stream.on('data', onData);
+    model.stream.once('end', onEnd);
+  });
+};
+
+module.exports = ModelStore;
 
 /***/ }),
-/* 28 */
+/* 37 */
+/***/ (function(module, exports) {
+
+module.exports = require("async/eachSeries");
+
+/***/ }),
+/* 38 */
+/***/ (function(module, exports) {
+
+module.exports = require("async/parallel");
+
+/***/ }),
+/* 39 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var events = __webpack_require__(1);
+
+var request = __webpack_require__(3);
+
+var EventEmitter = events.EventEmitter;
+
+var NetworkConnection = function (_EventEmitter) {
+  _inherits(NetworkConnection, _EventEmitter);
+
+  function NetworkConnection(options) {
+    _classCallCheck(this, NetworkConnection);
+
+    var _this = _possibleConstructorReturn(this, (NetworkConnection.__proto__ || Object.getPrototypeOf(NetworkConnection)).call(this));
+
+    if (!options) {
+      throw new Error('Options are missing.');
+    }
+    if (!options.host) {
+      throw new Error('Host is missing.');
+    }
+    if (!options.port) {
+      throw new Error('Port is missing.');
+    }
+
+    _this.host = options.host;
+    _this.port = options.port;
+
+    _this.isOnline = undefined;
+    _this.wasOnline = undefined;
+    _this.interval = 2 * 1000;
+    _this.timeoutId = undefined;
+
+    _this.test();
+    return _this;
+  }
+
+  _createClass(NetworkConnection, [{
+    key: 'online',
+    value: function online() {
+      this.wasOnline = this.isOnline;
+      this.isOnline = true;
+
+      if (this.isOnline !== this.wasOnline) {
+        this.emit('online');
+      }
+    }
+  }, {
+    key: 'offline',
+    value: function offline() {
+      this.wasOnline = this.isOnline;
+      this.isOnline = false;
+
+      if (this.isOnline !== this.wasOnline) {
+        this.emit('offline');
+      }
+    }
+  }, {
+    key: 'test',
+    value: function test() {
+      var _this2 = this;
+
+      var host = this.host,
+          port = this.port;
+
+
+      request({
+        method: 'GET',
+        hostname: host,
+        port: port,
+        path: '/v1/ping?_=' + Date.now(),
+        withCredentials: false
+      }, function (err) {
+        if (err) {
+          _this2.offline();
+        } else {
+          _this2.online();
+        }
+
+        clearTimeout(_this2.timeoutId);
+        _this2.timeoutId = setTimeout(function () {
+          return _this2.test();
+        }, _this2.interval);
+      });
+    }
+  }, {
+    key: 'destroy',
+    value: function destroy() {
+      clearTimeout(this.timeoutId);
+    }
+  }]);
+
+  return NetworkConnection;
+}(EventEmitter);
+
+module.exports = NetworkConnection;
+
+/***/ }),
+/* 40 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var Https = __webpack_require__(41),
+    Wss = __webpack_require__(43);
+
+var wires = {
+  https: Https,
+  wss: Wss
+};
+
+module.exports = wires;
+
+/***/ }),
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2179,10 +2328,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var events = __webpack_require__(1),
     stream = __webpack_require__(4);
 
-var jsonLinesClient = __webpack_require__(38),
+var jsonLinesClient = __webpack_require__(42),
     Promise = __webpack_require__(0).Promise;
 
-var request = __webpack_require__(2);
+var request = __webpack_require__(3);
 
 var EventEmitter = events.EventEmitter,
     PassThrough = stream.PassThrough;
@@ -2477,7 +2626,13 @@ var Https = function (_EventEmitter) {
 module.exports = Https;
 
 /***/ }),
-/* 29 */
+/* 42 */
+/***/ (function(module, exports) {
+
+module.exports = require("json-lines-client");
+
+/***/ }),
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2495,7 +2650,7 @@ var events = __webpack_require__(1),
     stream = __webpack_require__(4);
 
 var Promise = __webpack_require__(0).Promise,
-    uuid = __webpack_require__(3),
+    uuid = __webpack_require__(2),
     WebSocket = __webpack_require__(44);
 
 var EventEmitter = events.EventEmitter,
@@ -2855,164 +3010,6 @@ var Wss = function (_EventEmitter) {
 }(EventEmitter);
 
 module.exports = Wss;
-
-/***/ }),
-/* 30 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var Https = __webpack_require__(28),
-    Wss = __webpack_require__(29);
-
-var wires = {
-  https: Https,
-  wss: Wss
-};
-
-module.exports = wires;
-
-/***/ }),
-/* 31 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var isNode = __webpack_require__(7),
-    Promise = __webpack_require__(0).Promise;
-
-var authenticationStrategies = __webpack_require__(5),
-    getApp = __webpack_require__(6);
-
-var appCache = {};
-
-var wolkenkitClient = {
-  authentication: authenticationStrategies,
-
-  connect: function connect(options) {
-    if (!options) {
-      throw new Error('Options are missing.');
-    }
-    if (!options.host) {
-      throw new Error('Host is missing.');
-    }
-
-    var configuration = options.configuration,
-        host = options.host,
-        _options$port = options.port,
-        port = _options$port === undefined ? 443 : _options$port,
-        _options$protocol = options.protocol,
-        protocol = _options$protocol === undefined ? isNode ? 'https' : 'wss' : _options$protocol,
-        _options$authenticati = options.authentication,
-        authentication = _options$authenticati === undefined ? new this.authentication.None() : _options$authenticati;
-
-
-    return new Promise(function (resolve, reject) {
-      setTimeout(function () {
-        var appKey = host + ':' + port;
-        var app = appCache[appKey];
-
-        if (app) {
-          return resolve(app);
-        }
-
-        getApp({ host: host, port: port, protocol: protocol, authentication: authentication, configuration: configuration }).then(function (newApp) {
-          appCache[appKey] = newApp;
-          resolve(newApp);
-        }).catch(reject);
-      }, 0.05 * 1000);
-    });
-  },
-
-
-  // Internal function, for tests only.
-  reset: function reset(options) {
-    options = options || {};
-    options.keepLocalStorage = options.keepLocalStorage || false;
-
-    Object.keys(appCache).forEach(function (appName) {
-      appCache[appName].destroy(options);
-    });
-
-    appCache = {};
-  }
-};
-
-module.exports = wolkenkitClient;
-
-/***/ }),
-/* 32 */
-/***/ (function(module, exports) {
-
-module.exports = require("async/eachSeries");
-
-/***/ }),
-/* 33 */
-/***/ (function(module, exports) {
-
-module.exports = require("async/parallel");
-
-/***/ }),
-/* 34 */
-/***/ (function(module, exports) {
-
-module.exports = require("commands-events");
-
-/***/ }),
-/* 35 */
-/***/ (function(module, exports) {
-
-module.exports = require("datasette");
-
-/***/ }),
-/* 36 */
-/***/ (function(module, exports) {
-
-module.exports = require("defekt");
-
-/***/ }),
-/* 37 */
-/***/ (function(module, exports) {
-
-module.exports = require("https");
-
-/***/ }),
-/* 38 */
-/***/ (function(module, exports) {
-
-module.exports = require("json-lines-client");
-
-/***/ }),
-/* 39 */
-/***/ (function(module, exports) {
-
-module.exports = require("lodash/assign");
-
-/***/ }),
-/* 40 */
-/***/ (function(module, exports) {
-
-module.exports = require("lodash/flatten");
-
-/***/ }),
-/* 41 */
-/***/ (function(module, exports) {
-
-module.exports = require("lodash/merge");
-
-/***/ }),
-/* 42 */
-/***/ (function(module, exports) {
-
-module.exports = require("parse-duration");
-
-/***/ }),
-/* 43 */
-/***/ (function(module, exports) {
-
-module.exports = require("streamtoarray");
 
 /***/ }),
 /* 44 */
