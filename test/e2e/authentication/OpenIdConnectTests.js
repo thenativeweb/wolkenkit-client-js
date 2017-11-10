@@ -9,8 +9,8 @@ suite('OpenIdConnect', function () {
   this.timeout(5 * 60 * 1000);
 
   const applicationUrl = 'http://localhost:4567/authentication/';
-  const loginUrl = 'https://goloroden.auth0.com/login';
-  const waitTimeout = 10 * 1000;
+  const loginUrl = 'https://thenativeweb.eu.auth0.com/login';
+  const waitTimeout = 20 * 1000;
 
   const callLoginFunction = function () {
     /* eslint-disable prefer-arrow-callback */
@@ -26,9 +26,9 @@ suite('OpenIdConnect', function () {
     browser.waitUntil(() => browser.getUrl().startsWith(loginUrl),
       waitTimeout, `expected login to redirect to ${loginUrl}`);
 
-    browser.waitForVisible('input[name="email"]', waitTimeout);
+    browser.waitForVisible('input[name="username  "]', waitTimeout);
 
-    browser.setValue('input[name="email"]', 'alfred@thenativeweb.io');
+    browser.setValue('input[name="username  "]', 'alfred@thenativeweb.io');
     browser.setValue('input[name="password"]', 'YyKsuA6hoBUBZJbdi3jtzCERYasbCkXU');
 
     browser.click('.auth0-lock-submit');

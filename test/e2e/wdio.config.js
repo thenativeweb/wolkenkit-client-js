@@ -4,8 +4,6 @@ const path = require('path');
 
 const processenv = require('processenv');
 
-const webpackConfig = require('../../webpack.config.js');
-
 const configuration = {
   services: [],
   specs: [ path.join(__dirname, '**', '*Tests.js') ],
@@ -53,10 +51,6 @@ configuration.staticServerFolders = [
   { mount: '/authentication', path: path.join(__dirname, 'authentication') },
   { mount: '/dist', path: path.join(__dirname, '..', '..', 'dist') }
 ];
-
-configuration.services.push('webpack');
-configuration.webpackConfig = webpackConfig.find(
-  config => config.output.filename === 'wolkenkit-client.browser.js');
 
 module.exports = {
   config: configuration

@@ -10,8 +10,14 @@ roboter.
     });
 
     task('universal/shell', {
-      build: './node_modules/.bin/webpack --config webpack.config.js',
-      'test-e2e': './node_modules/.bin/wdio test/e2e/wdio.config.js'
+      build: 'npx webpack --config webpack.config.js',
+      'test-e2e': [
+        'echo ""',
+        'echo "To run the e2e tests, run the following command:"',
+        'echo ""',
+        'echo "  npx webpack --config webpack.browser-tests.config.js && npx wdio test/e2e/wdio.config.js"',
+        'echo ""'
+      ].join(' && ')
     });
 
     task('universal/unused-dependencies', {

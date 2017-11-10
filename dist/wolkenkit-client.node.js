@@ -476,7 +476,24 @@ var OpenIdConnect = function () {
   }, {
     key: 'isLoggedIn',
     value: function isLoggedIn() {
-      return Boolean(window.localStorage.getItem(this.getKey()));
+      var profile = this.getProfile();
+
+      if (!profile) {
+        return false;
+      }
+
+      if (!profile.exp) {
+        return false;
+      }
+
+      var expiresAt = profile.exp * 1000;
+      var now = Date.now();
+
+      if (expiresAt < now) {
+        return false;
+      }
+
+      return true;
     }
   }, {
     key: 'getToken',
