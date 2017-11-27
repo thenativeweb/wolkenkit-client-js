@@ -13,7 +13,7 @@ if (process.env.TEST_ENV === 'browser') {
 }
 
 const env = {
-  MONGO_URL_INTEGRATION: process.env.MONGO_URL_INTEGRATION || 'mongodb://wolkenkit:test@local.wolkenkit.io:9004/wolkenkit',
+  MONGO_URL_INTEGRATION: process.env.MONGO_URL_INTEGRATION || 'mongodb://wolkenkit:test@local.wolkenkit.io:9002/wolkenkit',
   REMOTE_PORT: remotePort,
   REMOTE_URL: remoteUrl,
   TEST_ENV: process.env.TEST_ENV

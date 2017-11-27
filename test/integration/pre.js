@@ -8,7 +8,7 @@ const processes = require('../helpers/processes');
 
 const remoteServerBinary = path.join(__dirname, '..', 'helpers', 'remote.js');
 const wolkenkitDirectory = path.join(__dirname, '..', '..', 'node_modules', 'wolkenkit-test');
-const wolkenkitBinary = path.join(wolkenkitDirectory, 'wolkenkit');
+const wolkenkitBinary = path.join(__dirname, '..', '..', 'node_modules', '.bin', 'wolkenkit');
 
 const pre = function (done) {
   processes.remote = shell.exec(`node ${remoteServerBinary}`, { async: true });

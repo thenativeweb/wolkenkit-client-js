@@ -77,6 +77,10 @@ suite('getWriteModelApi', () => {
     const commandRunner = aggregate.baz();
 
     assert.that(commandRunner).is.instanceOf(CommandRunner);
-    done();
+
+    commandRunner.failed(err => {
+      assert.that(err.code).is.equalTo('ECOMMANDFAILED');
+      done();
+    });
   });
 });

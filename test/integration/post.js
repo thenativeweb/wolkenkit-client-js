@@ -7,7 +7,7 @@ const shell = require('shelljs');
 const processes = require('../helpers/processes');
 
 const wolkenkitDirectory = path.join(__dirname, '..', '..', 'node_modules', 'wolkenkit-test');
-const wolkenkitBinary = path.join(wolkenkitDirectory, 'wolkenkit');
+const wolkenkitBinary = path.join(__dirname, '..', '..', 'node_modules', '.bin', 'wolkenkit');
 
 const post = function (done) {
   if (processes.remote) {
