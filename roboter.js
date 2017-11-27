@@ -38,8 +38,10 @@ roboter.
 
         // Combined licenses
         '(Apache-2.0 OR MPL-1.1)',
+        '(BSD-2-Clause OR MIT OR Apache-2.0)',
         'BSD-3-Clause OR MIT',
         '(MIT AND CC-BY-3.0)',
+        '(MIT AND Zlib)',
         '(MIT OR Apache-2.0)',
         '(WTFPL OR MIT)'
       ],
@@ -76,6 +78,11 @@ roboter.
 
         // MIT, see https://github.com/eugeneware/unique-stream/blob/v1.0.0/LICENSE
         'unique-stream': '1.0.0',
+
+        // AGPL 3.0
+        // Basically, this is not compatible to LGPL 3.0, but since this is our
+        // code anyway, we are free to use it.
+        wolkenkit: '1.1.3',
 
         // AGPL 3.0
         // Basically, this is not compatible to LGPL 3.0, but since this is our

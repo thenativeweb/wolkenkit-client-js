@@ -2468,6 +2468,8 @@ var Https = function (_EventEmitter) {
           path: '/v1/events',
           body: filter
         }, function (server) {
+          var hadError = false;
+
           var onServerData = void 0,
               onServerEnd = void 0,
               onServerError = void 0,
@@ -2491,6 +2493,7 @@ var Https = function (_EventEmitter) {
           };
 
           onServerError = function onServerError(err) {
+            hadError = true;
             unsubscribe();
             server.disconnect();
 
@@ -2515,7 +2518,15 @@ var Https = function (_EventEmitter) {
           server.stream.on('error', onServerError);
           subscriptionStream.on('finish', onSubscriptionFinish);
 
-          subscriptionStream.emit('start');
+          // Delay notifying the consumer, to give the underlying JSON lines
+          // connection the chance to emit an error event.
+          process.nextTick(function () {
+            if (hadError) {
+              return;
+            }
+
+            subscriptionStream.emit('start');
+          });
         });
       });
 
