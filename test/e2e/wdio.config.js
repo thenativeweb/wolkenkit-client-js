@@ -49,7 +49,7 @@ if (processenv('CI')) {
 configuration.services.push('static-server');
 configuration.staticServerFolders = [
   { mount: '/authentication', path: path.join(__dirname, 'authentication') },
-  { mount: '/dist', path: path.join(__dirname, '..', '..', 'dist') }
+  { mount: '/dist', path: path.join(__dirname, 'dist') }
 ];
 
 module.exports = {

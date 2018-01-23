@@ -6,4 +6,5 @@
 .DS_Store
 npm-debug.log
 
+test/e2e/dist/
 test/integration/dist/

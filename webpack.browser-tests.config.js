@@ -2,10 +2,12 @@
 
 const path = require('path');
 
-const processenv = require('processenv'),
+const merge = require('lodash/merge'),
+      nodeExternals = require('webpack-node-externals'),
+      processenv = require('processenv'),
       webpack = require('webpack');
 
-const configuration = {
+const tests = {
   bail: true,
   devtool: 'inline-source-map',
   entry: path.join(__dirname, 'test', 'integration', 'wolkenkitClientWssTests.js'),
@@ -38,4 +40,35 @@ const configuration = {
   ]
 };
 
-module.exports = configuration;
+const e2eDist = {
+  bail: true,
+  entry: path.join(__dirname, 'lib', 'wolkenkitClient.js'),
+  output: {
+    path: path.resolve(__dirname, 'test', 'e2e', 'dist'),
+    filename: 'wolkenkit-client.browser.js',
+    library: 'wolkenkit',
+    libraryTarget: 'umd'
+  },
+  target: 'web',
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              babelrc: false,
+              presets: [ 'es2015' ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  plugins: [
+    new webpack.DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify('production') })
+  ]
+};
+
+module.exports = [ tests, e2eDist ];
