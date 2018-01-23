@@ -26,9 +26,9 @@ suite('OpenIdConnect', function () {
     browser.waitUntil(() => browser.getUrl().startsWith(loginUrl),
       waitTimeout, `expected login to redirect to ${loginUrl}`);
 
-    browser.waitForVisible('input[name="username  "]', waitTimeout);
+    browser.waitForVisible('input[name="username"]', waitTimeout);
 
-    browser.setValue('input[name="username  "]', 'alfred@thenativeweb.io');
+    browser.setValue('input[name="username"]', 'alfred@thenativeweb.io');
     browser.setValue('input[name="password"]', 'YyKsuA6hoBUBZJbdi3jtzCERYasbCkXU');
 
     browser.click('.auth0-lock-submit');
