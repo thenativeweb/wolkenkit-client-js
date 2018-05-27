@@ -3,7 +3,7 @@
 const assert = require('assertthat'),
       nock = require('nock');
 
-const NetworkConnection = require('../../lib/NetworkConnection');
+const NetworkConnection = require('../../src/NetworkConnection');
 
 suite('NetworkConnection', () => {
   test('is a function.', done => {

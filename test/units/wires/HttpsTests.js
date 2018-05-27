@@ -7,7 +7,7 @@ const assert = require('assertthat'),
       toArray = require('streamtoarray'),
       uuid = require('uuidv4');
 
-const Https = require('../../../lib/wires/Https');
+const Https = require('../../../src/wires/Https');
 
 suite('Https', () => {
   test('is a function.', done => {

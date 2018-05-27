@@ -2,8 +2,8 @@
 
 const assert = require('assertthat');
 
-const isEventIn = require('../../../../../lib/apiBuilder/aggregates/events/isEventIn'),
-      sampleConfiguration = require('../../../../data/sampleConfiguration.json');
+const isEventIn = require('../../../../../src/apiBuilder/aggregates/events/isEventIn'),
+      sampleConfiguration = require('../../../../shared/data/sampleConfiguration.json');
 
 const sampleWriteModel = sampleConfiguration.writeModel;
 

@@ -3,7 +3,7 @@
 const assert = require('assertthat'),
       nock = require('nock');
 
-const request = require('../../lib/request');
+const request = require('../../src/request');
 
 suite('request', () => {
   test('is a function.', done => {

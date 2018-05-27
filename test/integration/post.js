@@ -4,7 +4,7 @@ const path = require('path');
 
 const shell = require('shelljs');
 
-const processes = require('../helpers/processes');
+const processes = require('../shared/processes');
 
 const wolkenkitDirectory = path.join(__dirname, '..', '..', 'node_modules', 'wolkenkit-test');
 const wolkenkitBinary = path.join(__dirname, '..', '..', 'node_modules', '.bin', 'wolkenkit');

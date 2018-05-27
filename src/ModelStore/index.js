@@ -20,8 +20,8 @@ ModelStore.prototype.initialize = function (options, callback) {
 
   this.stores = options.stores;
 
-  parallel(Object.keys(this.stores).map(storeType =>
-    done => this.stores[storeType].initialize({}, done)
+  parallel(Object.keys(this.stores).map(
+    storeType => done => this.stores[storeType].initialize({}, done)
   ), err => {
     if (err) {
       return callback(err);
@@ -59,8 +59,8 @@ ModelStore.prototype.processEvents = function (events, callback) {
     storeSpecificEvents[modelType].push(event);
   });
 
-  parallel(Object.keys(this.stores).map(storeType =>
-    done => this.processEventsInStore(this.stores[storeType], storeSpecificEvents[storeType], done)
+  parallel(Object.keys(this.stores).map(
+    storeType => done => this.processEventsInStore(this.stores[storeType], storeSpecificEvents[storeType], done)
   ), callback);
 };
 

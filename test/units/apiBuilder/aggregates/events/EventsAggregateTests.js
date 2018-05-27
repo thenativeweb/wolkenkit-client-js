@@ -6,9 +6,9 @@ const assert = require('assertthat'),
       Event = require('commands-events').Event,
       uuid = require('uuidv4');
 
-const EventsAggregate = require('../../../../../lib/apiBuilder/aggregates/events/EventsAggregate'),
-      FakeWire = require('../../../../helpers/FakeWire'),
-      sampleConfiguration = require('../../../../data/sampleConfiguration.json');
+const EventsAggregate = require('../../../../../src/apiBuilder/aggregates/events/EventsAggregate'),
+      FakeWire = require('../../../../shared/FakeWire'),
+      sampleConfiguration = require('../../../../shared/data/sampleConfiguration.json');
 
 const sampleWriteModel = sampleConfiguration.writeModel;
 

@@ -25,7 +25,7 @@ suite('Wss', () => {
 
     mockery.registerMock('ws', FakeWebSocket);
 
-    const Wss = require('../../../lib/wires/Wss');
+    const Wss = require('../../../src/wires/Wss');
 
     assert.that(Wss).is.ofType('function');
     done();
@@ -38,7 +38,7 @@ suite('Wss', () => {
 
     mockery.registerMock('ws', FakeWebSocket);
 
-    const Wss = require('../../../lib/wires/Wss');
+    const Wss = require('../../../src/wires/Wss');
 
     assert.that(() => {
       /* eslint-disable no-new */
@@ -55,7 +55,7 @@ suite('Wss', () => {
 
     mockery.registerMock('ws', FakeWebSocket);
 
-    const Wss = require('../../../lib/wires/Wss');
+    const Wss = require('../../../src/wires/Wss');
 
     assert.that(() => {
       /* eslint-disable no-new */
@@ -72,7 +72,7 @@ suite('Wss', () => {
 
     mockery.registerMock('ws', FakeWebSocket);
 
-    const Wss = require('../../../lib/wires/Wss');
+    const Wss = require('../../../src/wires/Wss');
 
     assert.that(() => {
       /* eslint-disable no-new */
@@ -89,7 +89,7 @@ suite('Wss', () => {
 
     mockery.registerMock('ws', FakeWebSocket);
 
-    const Wss = require('../../../lib/wires/Wss');
+    const Wss = require('../../../src/wires/Wss');
 
     assert.that(() => {
       /* eslint-disable no-new */
@@ -107,7 +107,7 @@ suite('Wss', () => {
 
     mockery.registerMock('ws', FakeWebSocket);
 
-    const Wss = require('../../../lib/wires/Wss');
+    const Wss = require('../../../src/wires/Wss');
 
     const wire = new Wss({
       app: {},
@@ -160,7 +160,7 @@ suite('Wss', () => {
 
       mockery.registerMock('ws', FakeWebSocket);
 
-      const Wss = require('../../../lib/wires/Wss');
+      const Wss = require('../../../src/wires/Wss');
       const wire = getWire(Wss);
 
       assert.that(wire.sendCommand).is.ofType('function');
@@ -174,7 +174,7 @@ suite('Wss', () => {
 
       mockery.registerMock('ws', FakeWebSocket);
 
-      const Wss = require('../../../lib/wires/Wss');
+      const Wss = require('../../../src/wires/Wss');
       const wire = getWire(Wss);
 
       assert.that(() => {
@@ -206,7 +206,7 @@ suite('Wss', () => {
 
       mockery.registerMock('ws', FakeWebSocket);
 
-      const Wss = require('../../../lib/wires/Wss');
+      const Wss = require('../../../src/wires/Wss');
       const wire = getWire(Wss);
 
       wire.sendCommand(command).
@@ -234,7 +234,7 @@ suite('Wss', () => {
 
       mockery.registerMock('ws', FakeWebSocket);
 
-      const Wss = require('../../../lib/wires/Wss');
+      const Wss = require('../../../src/wires/Wss');
       const wire = getWire(Wss);
 
       wire.sendCommand(command).
@@ -269,7 +269,7 @@ suite('Wss', () => {
 
       mockery.registerMock('ws', FakeWebSocket);
 
-      const Wss = require('../../../lib/wires/Wss');
+      const Wss = require('../../../src/wires/Wss');
       const wire = getWire(Wss);
 
       wire.app.auth = {
@@ -304,7 +304,7 @@ suite('Wss', () => {
 
       mockery.registerMock('ws', FakeWebSocket);
 
-      const Wss = require('../../../lib/wires/Wss');
+      const Wss = require('../../../src/wires/Wss');
       const wire = getWire(Wss);
 
       wire.once('authentication-required', () => {
@@ -349,7 +349,7 @@ suite('Wss', () => {
 
       mockery.registerMock('ws', FakeWebSocket);
 
-      const Wss = require('../../../lib/wires/Wss');
+      const Wss = require('../../../src/wires/Wss');
       const wire = getWire(Wss);
 
       assert.that(wire.subscribeToEvents).is.ofType('function');
@@ -379,7 +379,7 @@ suite('Wss', () => {
 
       mockery.registerMock('ws', FakeWebSocket);
 
-      const Wss = require('../../../lib/wires/Wss');
+      const Wss = require('../../../src/wires/Wss');
       const wire = getWire(Wss);
 
       const events = wire.subscribeToEvents();
@@ -412,7 +412,7 @@ suite('Wss', () => {
 
       mockery.registerMock('ws', FakeWebSocket);
 
-      const Wss = require('../../../lib/wires/Wss');
+      const Wss = require('../../../src/wires/Wss');
       const wire = getWire(Wss);
 
       const events = wire.subscribeToEvents({ name: 'joined' });
@@ -445,7 +445,7 @@ suite('Wss', () => {
 
       mockery.registerMock('ws', FakeWebSocket);
 
-      const Wss = require('../../../lib/wires/Wss');
+      const Wss = require('../../../src/wires/Wss');
       const wire = getWire(Wss);
 
       wire.app.auth = {
@@ -498,7 +498,7 @@ suite('Wss', () => {
 
       mockery.registerMock('ws', FakeWebSocket);
 
-      const Wss = require('../../../lib/wires/Wss');
+      const Wss = require('../../../src/wires/Wss');
       const wire = getWire(Wss);
 
       const events = wire.subscribeToEvents({});
@@ -558,7 +558,7 @@ suite('Wss', () => {
 
       mockery.registerMock('ws', FakeWebSocket);
 
-      const Wss = require('../../../lib/wires/Wss');
+      const Wss = require('../../../src/wires/Wss');
       const wire = getWire(Wss);
 
       wire.once('authentication-required', () => {
@@ -591,7 +591,7 @@ suite('Wss', () => {
 
         mockery.registerMock('ws', FakeWebSocket);
 
-        const Wss = require('../../../lib/wires/Wss');
+        const Wss = require('../../../src/wires/Wss');
         const wire = getWire(Wss);
 
         const events = wire.subscribeToEvents();
@@ -634,7 +634,7 @@ suite('Wss', () => {
 
       mockery.registerMock('ws', FakeWebSocket);
 
-      const Wss = require('../../../lib/wires/Wss');
+      const Wss = require('../../../src/wires/Wss');
       const wire = getWire(Wss);
 
       assert.that(wire.readModel).is.ofType('function');
@@ -648,7 +648,7 @@ suite('Wss', () => {
 
       mockery.registerMock('ws', FakeWebSocket);
 
-      const Wss = require('../../../lib/wires/Wss');
+      const Wss = require('../../../src/wires/Wss');
       const wire = getWire(Wss);
 
       assert.that(() => {
@@ -664,7 +664,7 @@ suite('Wss', () => {
 
       mockery.registerMock('ws', FakeWebSocket);
 
-      const Wss = require('../../../lib/wires/Wss');
+      const Wss = require('../../../src/wires/Wss');
       const wire = getWire(Wss);
 
       assert.that(() => {
@@ -680,7 +680,7 @@ suite('Wss', () => {
 
       mockery.registerMock('ws', FakeWebSocket);
 
-      const Wss = require('../../../lib/wires/Wss');
+      const Wss = require('../../../src/wires/Wss');
       const wire = getWire(Wss);
 
       assert.that(() => {
@@ -718,7 +718,7 @@ suite('Wss', () => {
 
       mockery.registerMock('ws', FakeWebSocket);
 
-      const Wss = require('../../../lib/wires/Wss');
+      const Wss = require('../../../src/wires/Wss');
       const wire = getWire(Wss);
 
       const model = wire.readModel({ modelType: 'lists', modelName: 'peerGroups' });
@@ -761,7 +761,7 @@ suite('Wss', () => {
 
       mockery.registerMock('ws', FakeWebSocket);
 
-      const Wss = require('../../../lib/wires/Wss');
+      const Wss = require('../../../src/wires/Wss');
       const wire = getWire(Wss);
 
       const model = wire.readModel({
@@ -805,7 +805,7 @@ suite('Wss', () => {
 
       mockery.registerMock('ws', FakeWebSocket);
 
-      const Wss = require('../../../lib/wires/Wss');
+      const Wss = require('../../../src/wires/Wss');
       const wire = getWire(Wss);
 
       wire.app.auth = {
@@ -857,7 +857,7 @@ suite('Wss', () => {
 
       mockery.registerMock('ws', FakeWebSocket);
 
-      const Wss = require('../../../lib/wires/Wss');
+      const Wss = require('../../../src/wires/Wss');
       const wire = getWire(Wss);
 
       const model = wire.readModel({ modelType: 'lists', modelName: 'peerGroups' });
@@ -896,7 +896,7 @@ suite('Wss', () => {
 
       mockery.registerMock('ws', FakeWebSocket);
 
-      const Wss = require('../../../lib/wires/Wss');
+      const Wss = require('../../../src/wires/Wss');
       const wire = getWire(Wss);
 
       wire.once('authentication-required', () => {
@@ -929,7 +929,7 @@ suite('Wss', () => {
 
         mockery.registerMock('ws', FakeWebSocket);
 
-        const Wss = require('../../../lib/wires/Wss');
+        const Wss = require('../../../src/wires/Wss');
         const wire = getWire(Wss);
 
         const model = wire.readModel({ modelType: 'lists', modelName: 'peerGroups' });

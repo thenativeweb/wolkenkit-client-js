@@ -2,8 +2,8 @@
 
 const assert = require('assertthat');
 
-const FakeWire = require('../../../helpers/FakeWire'),
-      ListStore = require('../../../../lib/modelStoreBroker/ListStore');
+const FakeWire = require('../../../shared/FakeWire'),
+      ListStore = require('../../../../src/modelStoreBroker/ListStore');
 
 suite('ListStore', () => {
   test('is a function.', done => {

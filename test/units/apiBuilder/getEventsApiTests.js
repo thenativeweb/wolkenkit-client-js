@@ -2,9 +2,9 @@
 
 const assert = require('assertthat');
 
-const EventsAggregate = require('../../../lib/apiBuilder/aggregates/events/EventsAggregate'),
-      getEventsApi = require('../../../lib/apiBuilder/getEventsApi'),
-      sampleConfiguration = require('../../data/sampleConfiguration.json');
+const EventsAggregate = require('../../../src/apiBuilder/aggregates/events/EventsAggregate'),
+      getEventsApi = require('../../../src/apiBuilder/getEventsApi'),
+      sampleConfiguration = require('../../shared/data/sampleConfiguration.json');
 
 suite('getEventsApi', () => {
   test('is a function.', done => {

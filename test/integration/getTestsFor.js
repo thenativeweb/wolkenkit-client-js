@@ -6,8 +6,8 @@ const assert = require('assertthat'),
       retry = require('retry'),
       uuid = require('uuidv4');
 
-const env = require('../helpers/env'),
-      wolkenkit = require('../../lib/wolkenkitClient');
+const env = require('../shared/env'),
+      wolkenkit = require('../../src/wolkenkitClient');
 
 const getTestsFor = function (testOptions) {
   if (!testOptions) {

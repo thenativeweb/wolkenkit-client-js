@@ -4,8 +4,8 @@ const stream = require('stream');
 
 const assert = require('assertthat');
 
-const FakeWire = require('../../../../helpers/FakeWire'),
-      ListAggregate = require('../../../../../lib/apiBuilder/aggregates/readModel/ListAggregate');
+const FakeWire = require('../../../../shared/FakeWire'),
+      ListAggregate = require('../../../../../src/apiBuilder/aggregates/readModel/ListAggregate');
 
 const PassThrough = stream.PassThrough;
 

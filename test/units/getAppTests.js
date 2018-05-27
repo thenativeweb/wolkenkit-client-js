@@ -4,10 +4,10 @@ const _ = require('lodash'),
       assert = require('assertthat'),
       nock = require('nock');
 
-const getApp = require('../../lib/getApp'),
-      localStorage = require('../../lib/localStorage'),
-      None = require('../../lib/authentication/None'),
-      sampleConfiguration = require('../data/sampleConfiguration.json');
+const getApp = require('../../src/getApp'),
+      localStorage = require('../../src/localStorage'),
+      None = require('../../src/authentication/None'),
+      sampleConfiguration = require('../shared/data/sampleConfiguration.json');
 
 suite('getApp', () => {
   test('is a function.', done => {

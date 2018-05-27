@@ -4,14 +4,14 @@ const assert = require('assertthat'),
       merge = require('lodash/merge'),
       uuid = require('uuidv4');
 
-const buildCommandApi = require('../../../lib/apiBuilder/buildCommandApi'),
-      CommandRunner = require('../../../lib/apiBuilder/CommandRunner'),
-      getApp = require('../../../lib/getApp'),
-      getEventsApi = require('../../../lib/apiBuilder/getEventsApi'),
-      getWriteModelApi = require('../../../lib/apiBuilder/getWriteModelApi'),
-      None = require('../../../lib/authentication/None');
+const buildCommandApi = require('../../../src/apiBuilder/buildCommandApi'),
+      CommandRunner = require('../../../src/apiBuilder/CommandRunner'),
+      getApp = require('../../../src/getApp'),
+      getEventsApi = require('../../../src/apiBuilder/getEventsApi'),
+      getWriteModelApi = require('../../../src/apiBuilder/getWriteModelApi'),
+      None = require('../../../src/authentication/None');
 
-const sampleConfiguration = require('../../data/sampleConfiguration.json');
+const sampleConfiguration = require('../../shared/data/sampleConfiguration.json');
 
 suite('buildCommandApi', () => {
   let app;

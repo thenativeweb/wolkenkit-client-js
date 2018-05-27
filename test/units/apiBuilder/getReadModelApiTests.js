@@ -2,10 +2,10 @@
 
 const assert = require('assertthat');
 
-const getReadModelApi = require('../../../lib/apiBuilder/getReadModelApi'),
-      ListAggregate = require('../../../lib/apiBuilder/aggregates/readModel/ListAggregate'),
-      ModelStore = require('../../../lib/ModelStore'),
-      sampleConfiguration = require('../../data/sampleConfiguration.json');
+const getReadModelApi = require('../../../src/apiBuilder/getReadModelApi'),
+      ListAggregate = require('../../../src/apiBuilder/aggregates/readModel/ListAggregate'),
+      ModelStore = require('../../../src/ModelStore'),
+      sampleConfiguration = require('../../shared/data/sampleConfiguration.json');
 
 suite('getReadModelApi', () => {
   let modelStore;

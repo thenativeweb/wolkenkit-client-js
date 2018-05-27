@@ -2,7 +2,7 @@
 
 const assert = require('assertthat');
 
-const areDifferent = require('../../../../../lib/apiBuilder/aggregates/readModel/areDifferent');
+const areDifferent = require('../../../../../src/apiBuilder/aggregates/readModel/areDifferent');
 
 suite('areDifferent', () => {
   test('is a function.', done => {

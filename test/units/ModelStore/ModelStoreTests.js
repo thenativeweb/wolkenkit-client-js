@@ -5,7 +5,7 @@ const stream = require('stream');
 const assert = require('assertthat');
 
 const buildEvent = require('./buildEvent'),
-      ModelStore = require('../../../lib/ModelStore');
+      ModelStore = require('../../../src/ModelStore');
 
 const PassThrough = stream.PassThrough;
 

@@ -3,8 +3,8 @@
 const assert = require('assertthat'),
       nock = require('nock');
 
-const sampleConfiguration = require('../data/sampleConfiguration.json'),
-      wolkenkitClient = require('../../lib/wolkenkitClient');
+const sampleConfiguration = require('../shared/data/sampleConfiguration.json'),
+      wolkenkitClient = require('../../src/wolkenkitClient');
 
 suite('wolkenkitClient', () => {
   let actualConfiguration;

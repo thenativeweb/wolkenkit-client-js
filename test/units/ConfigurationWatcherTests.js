@@ -6,9 +6,9 @@ const _ = require('lodash'),
 
 const EventEmitter = require('events').EventEmitter;
 
-const ConfigurationWatcher = require('../../lib/ConfigurationWatcher'),
-      localStorage = require('../../lib/localStorage'),
-      sampleConfiguration = require('../data/sampleConfiguration.json');
+const ConfigurationWatcher = require('../../src/ConfigurationWatcher'),
+      localStorage = require('../../src/localStorage'),
+      sampleConfiguration = require('../shared/data/sampleConfiguration.json');
 
 suite('ConfigurationWatcher', () => {
   const storageKey = 'wolkenkit_local.wolkenkit.io:9000_configuration';

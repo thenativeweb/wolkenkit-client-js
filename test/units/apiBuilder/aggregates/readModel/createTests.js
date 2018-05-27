@@ -2,8 +2,8 @@
 
 const assert = require('assertthat');
 
-const create = require('../../../../../lib/apiBuilder/aggregates/readModel/create'),
-      ListAggregate = require('../../../../../lib/apiBuilder/aggregates/readModel/ListAggregate');
+const create = require('../../../../../src/apiBuilder/aggregates/readModel/create'),
+      ListAggregate = require('../../../../../src/apiBuilder/aggregates/readModel/ListAggregate');
 
 const modelStore = {},
       wire = {};

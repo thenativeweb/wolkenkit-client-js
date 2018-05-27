@@ -4,7 +4,7 @@ const stream = require('stream');
 
 const assert = require('assertthat');
 
-const readSnapshot = require('../../../../../lib/apiBuilder/aggregates/readModel/readSnapshot');
+const readSnapshot = require('../../../../../src/apiBuilder/aggregates/readModel/readSnapshot');
 
 const PassThrough = stream.PassThrough;
 

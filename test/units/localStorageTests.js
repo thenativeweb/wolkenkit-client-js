@@ -2,7 +2,7 @@
 
 const assert = require('assertthat');
 
-const localStorage = require('../../lib/localStorage');
+const localStorage = require('../../src/localStorage');
 
 suite('localStorage', () => {
   setup(() => {

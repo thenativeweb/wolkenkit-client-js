@@ -2,7 +2,7 @@
 
 const assert = require('assertthat');
 
-const None = require('../../../lib/authentication/None');
+const None = require('../../../src/authentication/None');
 
 suite('None', () => {
   test('is a function.', done => {

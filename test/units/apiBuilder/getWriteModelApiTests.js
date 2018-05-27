@@ -2,11 +2,11 @@
 
 const assert = require('assertthat');
 
-const CommandRunner = require('../../../lib/apiBuilder/CommandRunner'),
-      getApp = require('../../../lib/getApp'),
-      getWriteModelApi = require('../../../lib/apiBuilder/getWriteModelApi'),
-      None = require('../../../lib/authentication/None'),
-      sampleConfiguration = require('../../data/sampleConfiguration.json');
+const CommandRunner = require('../../../src/apiBuilder/CommandRunner'),
+      getApp = require('../../../src/getApp'),
+      getWriteModelApi = require('../../../src/apiBuilder/getWriteModelApi'),
+      None = require('../../../src/authentication/None'),
+      sampleConfiguration = require('../../shared/data/sampleConfiguration.json');
 
 suite('getWriteModelApi', () => {
   let app;

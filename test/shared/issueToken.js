@@ -8,8 +8,8 @@ const Limes = require('limes');
 const limes = new Limes({
   identityProviderName: 'test.wolkenkit.io',
   /* eslint-disable no-sync */
-  privateKey: fs.readFileSync(path.join(__dirname, '..', 'keys', 'io.wolkenkit.test', 'privateKey.pem')),
-  certificate: fs.readFileSync(path.join(__dirname, '..', 'keys', 'io.wolkenkit.test', 'certificate.pem'))
+  privateKey: fs.readFileSync(path.join(__dirname, '..', 'shared', 'keys', 'io.wolkenkit.test', 'privateKey.pem')),
+  certificate: fs.readFileSync(path.join(__dirname, '..', 'shared', 'keys', 'io.wolkenkit.test', 'certificate.pem'))
   /* eslint-enable no-sync */
 });
 

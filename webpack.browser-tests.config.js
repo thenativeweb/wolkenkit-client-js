@@ -2,9 +2,7 @@
 
 const path = require('path');
 
-const merge = require('lodash/merge'),
-      nodeExternals = require('webpack-node-externals'),
-      processenv = require('processenv'),
+const processenv = require('processenv'),
       webpack = require('webpack');
 
 const tests = {
