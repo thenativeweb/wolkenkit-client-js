@@ -8,7 +8,7 @@ const merge = require('lodash/merge'),
 
 const configurationBase = {
   bail: true,
-  entry: path.join(__dirname, 'lib', 'wolkenkitClient.js'),
+  entry: path.join(__dirname, 'src', 'wolkenkitClient.js'),
   output: {
     path: path.resolve(__dirname, 'dist')
   },
@@ -21,7 +21,7 @@ const configurationBase = {
             loader: 'babel-loader',
             options: {
               babelrc: false,
-              presets: [ 'es2015' ]
+              presets: [ 'env' ]
             }
           }
         ]

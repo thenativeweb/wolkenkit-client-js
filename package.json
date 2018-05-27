@@ -20,7 +20,7 @@
   "browser": {
     "http": "http-browserify-2/http",
     "https": "http-browserify-2/https",
-    "ws": "./lib/wires/ws-browser"
+    "ws": "./src/wires/ws-browser"
   },
   "dependencies": {
     "async": "2.6.0",

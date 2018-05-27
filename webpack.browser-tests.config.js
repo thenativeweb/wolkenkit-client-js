@@ -23,7 +23,7 @@ const tests = {
             loader: 'babel-loader',
             options: {
               babelrc: false,
-              presets: [ 'es2015' ]
+              presets: [ 'env' ]
             }
           }
         ]
@@ -40,7 +40,7 @@ const tests = {
 
 const e2eDist = {
   bail: true,
-  entry: path.join(__dirname, 'lib', 'wolkenkitClient.js'),
+  entry: path.join(__dirname, 'src', 'wolkenkitClient.js'),
   output: {
     path: path.resolve(__dirname, 'test', 'e2e', 'dist'),
     filename: 'wolkenkit-client.browser.js',
@@ -57,7 +57,7 @@ const e2eDist = {
             loader: 'babel-loader',
             options: {
               babelrc: false,
-              presets: [ 'es2015' ]
+              presets: [ 'env' ]
             }
           }
         ]
