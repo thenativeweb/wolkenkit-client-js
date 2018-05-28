@@ -8,23 +8,23 @@ wolkenkit-client is a client to access wolkenkit applications.
 
 To build this module use [roboter](https://www.npmjs.com/package/roboter).
 
-```bash
-$ bot
+```shell
+$ npx roboter
 ```
 
 ## Creating the minified version
 
 To create the minified version of the client-side module, run the following command.
 
-```bash
-$ bot build
+```shell
+$ npx roboter build
 ```
 
 ## Running the integration tests in your local browser
 
 While developing the client you want to get feedback as quick as possible if the client still runs in current browsers. Therefore you can run the following command.
 
-```bash
+```shell
 $ node test/integration/runTestServerForBrowser.js
 ```
 
@@ -34,7 +34,7 @@ This will start a wolkenkit test application, build and watch the tests for the 
 
 To run the integration tests from a browser within a virtual machine, e.g. to run them using Internet Explorer 11, first you need to setup your virtual machine's `/etc/hosts` file such that `local.wolkenkit.io` resolves to the IP address of your host system.
 
-```bash
+```shell
 192.168.99.100  local.wolkenkit.io
 ```
 
@@ -44,7 +44,7 @@ Then, point your browser to `http://local.wolkenkit.io:3000/` to actually run th
 
 ## License
 
-Copyright (c) 2014-2017 the native web.
+Copyright (c) 2014-2018 the native web.
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
