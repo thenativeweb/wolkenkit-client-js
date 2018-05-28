@@ -6,16 +6,16 @@ const shell = require('shelljs');
 
 const processes = require('../shared/processes');
 
-const remoteServerBinary = path.join(__dirname, '..', 'helpers', 'remote.js');
-const wolkenkitDirectory = path.join(__dirname, '..', '..', 'node_modules', 'wolkenkit-test');
+const remoteServerBinary = path.join(__dirname, '..', 'shared', 'remote.js');
+const testApplicationDirectory = path.join(__dirname, '..', 'shared', 'testApp');
 const wolkenkitBinary = path.join(__dirname, '..', '..', 'node_modules', '.bin', 'wolkenkit');
 
-const pre = function (done) {
+const pre = async function () {
   processes.remote = shell.exec(`node ${remoteServerBinary}`, { async: true });
 
   shell.exec(`${wolkenkitBinary} start --shared-key test`, {
-    cwd: wolkenkitDirectory
-  }, done);
+    cwd: testApplicationDirectory
+  });
 };
 
 module.exports = pre;

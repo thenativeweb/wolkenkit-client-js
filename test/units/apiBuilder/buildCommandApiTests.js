@@ -1,11 +1,14 @@
 'use strict';
 
+const stream = require('stream');
+
 const assert = require('assertthat'),
       merge = require('lodash/merge'),
       uuid = require('uuidv4');
 
 const buildCommandApi = require('../../../src/apiBuilder/buildCommandApi'),
       CommandRunner = require('../../../src/apiBuilder/CommandRunner'),
+      FakeWire = require('../../shared/FakeWire'),
       getApp = require('../../../src/getApp'),
       getEventsApi = require('../../../src/apiBuilder/getEventsApi'),
       getWriteModelApi = require('../../../src/apiBuilder/getWriteModelApi'),
@@ -13,8 +16,11 @@ const buildCommandApi = require('../../../src/apiBuilder/buildCommandApi'),
 
 const sampleConfiguration = require('../../shared/data/sampleConfiguration.json');
 
+const PassThrough = stream.PassThrough;
+
 suite('buildCommandApi', () => {
-  let app;
+  let app,
+      wire;
 
   setup(done => {
     getApp({
@@ -25,8 +31,10 @@ suite('buildCommandApi', () => {
       configuration: sampleConfiguration
     }).
       then(_app => {
-        const eventsApi = getEventsApi({ wire: {}, writeModel: sampleConfiguration.writeModel }),
-              writeModelApi = getWriteModelApi({ app: _app, wire: {}, writeModel: sampleConfiguration.writeModel });
+        wire = new FakeWire({});
+
+        const eventsApi = getEventsApi({ wire, writeModel: sampleConfiguration.writeModel }),
+              writeModelApi = getWriteModelApi({ app: _app, wire, writeModel: sampleConfiguration.writeModel });
 
         app = merge({}, _app, eventsApi, writeModelApi);
         done();
@@ -117,9 +125,17 @@ suite('buildCommandApi', () => {
   test('returns a function that returns a command runner.', done => {
     const aggregateId = uuid();
 
+    wire.subscribeToEvents = function () {
+      const fakeEventStream = new PassThrough({ objectMode: true });
+
+      return {
+        stream: fakeEventStream
+      };
+    };
+
     const ping = buildCommandApi({
       app,
-      wire: {},
+      wire,
       contextName: 'network',
       aggregateName: 'node',
       commandName: 'ping',
@@ -142,9 +158,17 @@ suite('buildCommandApi', () => {
   test('sets correct command data.', done => {
     const aggregateId = uuid();
 
+    wire.subscribeToEvents = function () {
+      const fakeEventStream = new PassThrough({ objectMode: true });
+
+      return {
+        stream: fakeEventStream
+      };
+    };
+
     const ping = buildCommandApi({
       app,
-      wire: {},
+      wire,
       contextName: 'network',
       aggregateName: 'node',
       commandName: 'ping',
@@ -166,9 +190,17 @@ suite('buildCommandApi', () => {
   test('supports impersonation.', done => {
     const aggregateId = uuid();
 
+    wire.subscribeToEvents = function () {
+      const fakeEventStream = new PassThrough({ objectMode: true });
+
+      return {
+        stream: fakeEventStream
+      };
+    };
+
     const ping = buildCommandApi({
       app,
-      wire: {},
+      wire,
       contextName: 'network',
       aggregateName: 'node',
       commandName: 'ping',

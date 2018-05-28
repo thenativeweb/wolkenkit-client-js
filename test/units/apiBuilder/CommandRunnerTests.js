@@ -110,7 +110,14 @@ suite('CommandRunner', () => {
       assert.that(sentCommand.aggregate.name).is.equalTo(command.aggregate.name);
       assert.that(sentCommand.aggregate.id).is.equalTo(command.aggregate.id);
       assert.that(sentCommand.name).is.equalTo(command.name);
-      done();
+
+      // Resolve the promise in order to simulate an http request
+      return new Promise(resolve => {
+        setTimeout(() => {
+          resolve();
+          done();
+        }, 0.1 * 1000);
+      });
     };
 
     // In a minute, start the event stream so that the command runner detects
