@@ -1,9 +1,11 @@
 'use strict';
 
-const None = require('./None'),
+const Local = require('./Local'),
+      None = require('./None'),
       OpenIdConnect = require('./OpenIdConnect');
 
 const authentication = {
+  Local,
   None,
   OpenIdConnect
 };
