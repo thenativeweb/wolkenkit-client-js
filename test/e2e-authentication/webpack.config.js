@@ -10,7 +10,7 @@ module.exports = {
   ],
   output: {
     path: path.resolve(__dirname, 'build', 'authentication'),
-    filename: 'wolkenkit-client.js'
+    filename: 'testApp.js'
   },
   resolve: {
     alias: {

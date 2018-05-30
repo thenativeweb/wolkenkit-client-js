@@ -21,7 +21,9 @@ const post = async function () {
     processes.selenium.kill('SIGINT');
   }
 
-  // shell.exec(`pkill -f selenium-standalone`, { cwd: path.join(__dirname, '..', '..') });
+  if (processes.sauceConnect) {
+    processes.sauceConnect.kill('SIGINT');
+  }
 };
 
 module.exports = post;

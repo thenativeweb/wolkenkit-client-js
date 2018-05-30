@@ -4,15 +4,16 @@ const path = require('path');
 
 const shell = require('shelljs');
 
-const binaryDirectory = path.join(__dirname, '..', '..', 'node_modules', '.bin');
-const remoteServerBinary = path.join(__dirname, '..', 'helpers', 'remote.js');
-const webpackBinary = path.join(binaryDirectory, 'webpack');
-const webpackConfigFile = path.join(__dirname, '..', '..', 'webpack.browser-tests.config.js');
-const wolkenkitDirectory = path.join(__dirname, '..', '..', 'node_modules', 'wolkenkit-test');
-const wolkenkitBinary = path.join(__dirname, '..', '..', 'node_modules', '.bin', 'wolkenkit');
+const webpackConfigFile = path.join(__dirname, 'webpack.browser-tests.config.js');
+const testApplicationDirectory = path.join(__dirname, '..', 'shared', 'testApp');
+
+const binaryDirectory = path.join(__dirname, '..', '..', 'node_modules', '.bin'),
+      remoteServerBinary = path.join(__dirname, '..', 'shared', 'remote.js'),
+      webpackBinary = path.join(binaryDirectory, 'webpack'),
+      wolkenkitBinary = path.join(binaryDirectory, 'wolkenkit');
 
 shell.exec(`${wolkenkitBinary} start --shared-key test`, {
-  cwd: wolkenkitDirectory
+  cwd: testApplicationDirectory
 });
 
 const remoteServer = shell.exec(`node ${remoteServerBinary}`, { async: true });
@@ -20,7 +21,7 @@ const webpack = shell.exec(`${webpackBinary} --config ${webpackConfigFile} -w`, 
 
 const cleanUpAndExit = function () {
   shell.exec(`${wolkenkitBinary} stop --dangerously-destroy-data`, {
-    cwd: wolkenkitDirectory
+    cwd: testApplicationDirectory
   });
 
   webpack.kill('SIGINT');
