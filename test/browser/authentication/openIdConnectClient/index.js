@@ -12,4 +12,4 @@ global.openIdConnect = new wolkenkit.authentication.OpenIdConnect({
   strictMode: true
 });
 
-global.document.body.innerHTML = '<div id="log"></div>';
+global.document.body.innerHTML = '<div id="ready"></div>';

@@ -8,24 +8,26 @@ const processenv = require('processenv'),
 
 const processes = require('../shared/processes');
 
-const testEnv = processenv('TEST_ENV') || 'local';
+const seleniumEnvironment = processenv('SELENIUM_ENV') || 'local';
 
 const pre = async function () {
+  shell.exec('pkill -f selenium-standalone');
+
   const tempDistDir = path.join(__dirname, 'dist');
   const tempBuildDir = path.join(__dirname, 'build');
   const projectRoot = path.join(__dirname, '..', '..');
 
-  // Precompile and create dist
-  shell.exec(`babel src --out-dir ${tempDistDir} --copy-files`, { cwd: projectRoot });
+  // Precompile and create a temporary wolkenkit-client SDK distributable, so
+  // that the tests always use the latest version.
+  shell.exec(`npx babel src --out-dir ${tempDistDir} --copy-files`, { cwd: projectRoot });
 
-  // Build and bundle an application
+  // Build and bundle the OpenID Connect client test application.
   shell.exec(`npx webpack`, { cwd: __dirname });
 
-  // Serve the application via a http-server
   processes.httpServer = shell.exec(`npx http-server -s -p 4567 ${tempBuildDir}`, { cwd: projectRoot, async: true });
 
-  if (testEnv === 'local') {
-    // Start local selenium server
+  if (seleniumEnvironment === 'local') {
+    // Start local Selenium server.
     shell.exec(`npx selenium-standalone install`, { cwd: projectRoot });
     processes.selenium = shell.exec(`npx selenium-standalone start`, { cwd: projectRoot, async: true });
 
@@ -43,7 +45,7 @@ const pre = async function () {
     return;
   }
 
-  // Connect to sauce labs via secure tunnel using sauce connect
+  // Connect to SauceLabs via secure tunnel using sauce connect.
   await new Promise((resolve, reject) => {
     sauceConnectLauncher({
       username: processenv('SAUCE_USERNAME'),

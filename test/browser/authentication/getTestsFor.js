@@ -2,17 +2,25 @@
 
 /* global window */
 
-const processenv = require('processenv');
-
 const assert = require('assertthat'),
-      { Builder, By, until } = require('selenium-webdriver');
+      { Builder, By, until } = require('selenium-webdriver'),
+      processenv = require('processenv');
 
-const getTestsFor = function ({ browserConfig }) {
-  if (!browserConfig) {
-    throw new Error('Browser config is missing.');
+const getTestsFor = function ({ browserConfiguration, seleniumEnvironment }) {
+  if (!browserConfiguration) {
+    throw new Error('Browser configuration is missing.');
+  }
+  if (!seleniumEnvironment) {
+    throw new Error('Selenium environment is missing.');
   }
 
-  suite(`${browserConfig.browserName}${browserConfig.platform}${browserConfig.version}`, () => {
+  // Tests that run on mobile devices only provide platformName and
+  // platformVersion, so we need to fallback to those values manually. Tests
+  // that are run on the local machine, do have neither of these values.
+  browserConfiguration.platform = browserConfiguration.platform || browserConfiguration.platformName || 'current';
+  browserConfiguration.version = browserConfiguration.version || browserConfiguration.platformVersion || 'current';
+
+  suite(`${browserConfiguration.browserName} ${browserConfiguration.version} (${browserConfiguration.platform})`, () => {
     suite('OpenIdConnect', function () {
       this.timeout(5 * 60 * 1000);
 
@@ -22,20 +30,18 @@ const getTestsFor = function ({ browserConfig }) {
             loginUrl = 'https://thenativeweb.eu.auth0.com/login',
             waitTimeout = 20 * 1000;
 
-      let seleniumUrl = 'http://localhost:4445/wd/hub';
-
-      if (processenv('TEST_ENV') === 'cloud') {
-        seleniumUrl = `http://${processenv('SAUCE_USERNAME')}:${processenv('SAUCE_ACCESS_KEY')}@localhost:4445/wd/hub`;
-      }
+      const seleniumUrl = seleniumEnvironment === 'local' ?
+        'http://localhost:4444/wd/hub' :
+        `http://${processenv('SAUCE_USERNAME')}:${processenv('SAUCE_ACCESS_KEY')}@localhost:4445/wd/hub`;
 
       const startBrowser = async () => {
         browser = await new Builder().
           usingServer(seleniumUrl).
-          withCapabilities(browserConfig).
+          withCapabilities(browserConfiguration).
           build();
 
         await browser.get(applicationUrl);
-        await browser.wait(until.elementLocated(By.css('#log')), waitTimeout);
+        await browser.wait(until.elementLocated(By.css('#ready')), waitTimeout);
       };
 
       const stopBrowser = async () => {
@@ -62,20 +68,24 @@ const getTestsFor = function ({ browserConfig }) {
 
       const fillOutLoginForm = async function () {
         await browser.wait(until.urlContains(loginUrl));
+
         await browser.wait(until.elementLocated(By.css('input[name="username"]')), waitTimeout);
-        await browser.sleep(2 * 1000);
+        await browser.wait(until.elementLocated(By.css('input[name="password"]')), waitTimeout);
+        await browser.wait(until.elementLocated(By.css('.auth0-lock-submit')), waitTimeout);
 
         const userNameInput = await browser.findElement(By.css('input[name="username"]'));
-
-        await userNameInput.sendKeys('alfred@thenativeweb.io');
-
         const passwordInput = await browser.findElement(By.css('input[name="password"]'));
-
-        await passwordInput.sendKeys('YyKsuA6hoBUBZJbdi3jtzCERYasbCkXU');
-
         const submitButton = await browser.findElement(By.css('.auth0-lock-submit'));
 
-        submitButton.click();
+        await browser.wait(until.elementIsVisible(userNameInput), waitTimeout);
+        await browser.wait(until.elementIsVisible(passwordInput), waitTimeout);
+        await browser.wait(until.elementIsVisible(submitButton), waitTimeout);
+
+        await userNameInput.sendKeys('alfred@thenativeweb.io');
+        await browser.sleep(0.1 * 1000);
+        await passwordInput.sendKeys('YyKsuA6hoBUBZJbdi3jtzCERYasbCkXU');
+        await browser.sleep(0.1 * 1000);
+        await submitButton.click();
       };
 
       const performLogin = async function () {
@@ -83,12 +93,33 @@ const getTestsFor = function ({ browserConfig }) {
         await fillOutLoginForm();
 
         await browser.wait(until.urlContains(applicationUrl));
-        await browser.wait(until.elementLocated(By.css('#log')), waitTimeout);
+        await browser.wait(until.elementLocated(By.css('#ready')), waitTimeout);
+      };
+
+      const wrapForSauceLabs = function (fn) {
+        return async function () {
+          if (seleniumEnvironment === 'saucelabs') {
+            await browser.executeScript(`sauce:job-name=${this.test.fullTitle()}`);
+
+            try {
+              await fn();
+            } catch (ex) {
+              await browser.executeScript(`sauce:job-result=failed`);
+              throw ex;
+            }
+
+            await browser.executeScript(`sauce:job-result=passed`);
+
+            return;
+          }
+
+          await fn();
+        };
       };
 
       suite('at start', () => {
         suite('isLoggedIn', () => {
-          test('returns false.', async () => {
+          test('returns false.', wrapForSauceLabs(async () => {
             /* eslint-disable prefer-arrow-callback */
             const result = await browser.executeScript(function () {
               return window.openIdConnect.isLoggedIn();
@@ -96,11 +127,11 @@ const getTestsFor = function ({ browserConfig }) {
             /* eslint-enable prefer-arrow-callback */
 
             assert.that(result).is.false();
-          });
+          }));
         });
 
         suite('getToken', () => {
-          test('returns undefined.', async () => {
+          test('returns undefined.', wrapForSauceLabs(async () => {
             /* eslint-disable prefer-arrow-callback */
             const result = await browser.executeScript(function () {
               return {
@@ -110,11 +141,11 @@ const getTestsFor = function ({ browserConfig }) {
             /* eslint-enable prefer-arrow-callback */
 
             assert.that(result.isTokenUndefined).is.true();
-          });
+          }));
         });
 
         suite('getProfile', () => {
-          test('returns undefined.', async () => {
+          test('returns undefined.', wrapForSauceLabs(async () => {
             /* eslint-disable prefer-arrow-callback */
             const result = await browser.executeScript(function () {
               return {
@@ -124,29 +155,29 @@ const getTestsFor = function ({ browserConfig }) {
             /* eslint-enable prefer-arrow-callback */
 
             assert.that(result.isProfileUndefined).is.true();
-          });
+          }));
         });
       });
 
       suite('login', () => {
-        test('redirects to the identity provider.', async () => {
+        test('redirects to the identity provider.', wrapForSauceLabs(async () => {
           await callLoginFunction();
 
           await browser.wait(until.urlContains(loginUrl));
-        });
+        }));
 
-        test('redirects back to the application.', async () => {
+        test('redirects back to the application.', wrapForSauceLabs(async () => {
           await callLoginFunction();
           await fillOutLoginForm();
 
           await browser.wait(until.urlContains(applicationUrl));
-        });
+        }));
 
-        test('removes the token from the url.', async () => {
+        test('removes the token from the url.', wrapForSauceLabs(async () => {
           await performLogin();
-        });
+        }));
 
-        test('stores the token in local storage.', async () => {
+        test('stores the token in local storage.', wrapForSauceLabs(async () => {
           await performLogin();
 
           /* eslint-disable prefer-arrow-callback, no-var */
@@ -159,10 +190,10 @@ const getTestsFor = function ({ browserConfig }) {
           /* eslint-enable prefer-arrow-callback, no-var */
 
           assert.that(result).is.not.null();
-        });
+        }));
 
         suite('isLoggedIn', () => {
-          test('returns true.', async () => {
+          test('returns true.', wrapForSauceLabs(async () => {
             await performLogin();
 
             /* eslint-disable prefer-arrow-callback */
@@ -172,11 +203,11 @@ const getTestsFor = function ({ browserConfig }) {
             /* eslint-enable prefer-arrow-callback */
 
             assert.that(result).is.true();
-          });
+          }));
         });
 
         suite('getToken', () => {
-          test('returns the token.', async () => {
+          test('returns the token.', wrapForSauceLabs(async () => {
             await performLogin();
 
             /* eslint-disable prefer-arrow-callback */
@@ -188,11 +219,11 @@ const getTestsFor = function ({ browserConfig }) {
             /* eslint-enable prefer-arrow-callback */
 
             assert.that(result.isTokenUndefined).is.false();
-          });
+          }));
         });
 
         suite('getProfile', () => {
-          test('returns the profile.', async () => {
+          test('returns the profile.', wrapForSauceLabs(async () => {
             await performLogin();
 
             /* eslint-disable prefer-arrow-callback */
@@ -204,7 +235,7 @@ const getTestsFor = function ({ browserConfig }) {
             /* eslint-enable prefer-arrow-callback */
 
             assert.that(result.isProfileUndefined).is.false();
-          });
+          }));
         });
       });
 
@@ -219,7 +250,7 @@ const getTestsFor = function ({ browserConfig }) {
           return result;
         };
 
-        test('removes the token from local storage.', async () => {
+        test('removes the token from local storage.', wrapForSauceLabs(async () => {
           await performLogin();
           await callLogoutFunction();
 
@@ -232,10 +263,10 @@ const getTestsFor = function ({ browserConfig }) {
           /* eslint-enable prefer-arrow-callback, no-var */
 
           assert.that(result).is.null();
-        });
+        }));
 
         suite('isLoggedIn', () => {
-          test('returns false.', async () => {
+          test('returns false.', wrapForSauceLabs(async () => {
             await performLogin();
             await callLogoutFunction();
 
@@ -246,11 +277,11 @@ const getTestsFor = function ({ browserConfig }) {
             /* eslint-enable prefer-arrow-callback */
 
             assert.that(result).is.false();
-          });
+          }));
         });
 
         suite('getToken', () => {
-          test('returns undefined.', async () => {
+          test('returns undefined.', wrapForSauceLabs(async () => {
             await performLogin();
             await callLogoutFunction();
 
@@ -263,11 +294,11 @@ const getTestsFor = function ({ browserConfig }) {
             /* eslint-enable prefer-arrow-callback */
 
             assert.that(result.isTokenUndefined).is.true();
-          });
+          }));
         });
 
         suite('getProfile', () => {
-          test('returns undefined.', async () => {
+          test('returns undefined.', wrapForSauceLabs(async () => {
             await performLogin();
             await callLogoutFunction();
 
@@ -280,7 +311,7 @@ const getTestsFor = function ({ browserConfig }) {
             /* eslint-enable prefer-arrow-callback */
 
             assert.that(result.isProfileUndefined).is.true();
-          });
+          }));
         });
       });
     });

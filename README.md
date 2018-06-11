@@ -44,22 +44,22 @@ Then, point your browser to `http://local.wolkenkit.io:3000/` to actually run th
 
 ## Running the e2e-authentication test
 
-In order to verify that authentication strategies work in all the latest browsers, you can run e2e-authentication tests either inside chrome on your machine or using the latest versions of all major browsers on Sauce Labs.
+In order to verify that authentication strategies work in all the latest browsers, you can run e2e-authentication tests either inside Chrome on your machine or using the latest versions of all major browsers on Sauce Labs.
 
-### Using chrome on your local machine
+### Using Chrome on your local machine
 
-To run e2e browser tests inside chrome on your local machine, run the following command.
+To run e2e browser tests inside Chrome on your local machine, run the following command:
 
 ```shell
-$  npx bot test --type e2e-authentication
+$  npx roboter test --type e2e-authentication
 ```
 
 ### Using a variety of browser on Sauce Labs
 
-To run the tests on Sauce Labs, run the following command.
+To run the tests on Sauce Labs, run the following command:
 
 ```shell
-$  TEST_ENV=cloud npx bot test --type e2e-authentication
+$  TEST_ENV=cloud npx roboter test --type e2e-authentication
 ```
 
 Please note: You need to set the `SAUCE_USERNAME` and `SAUCE_ACCESS_KEY` environment variables in order for this to work.
