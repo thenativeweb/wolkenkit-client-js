@@ -6,6 +6,8 @@ const assert = require('assertthat'),
       { Builder, By, until } = require('selenium-webdriver'),
       processenv = require('processenv');
 
+const wrapForSauceLabs = require('../wrapForSauceLabs');
+
 const getTestsFor = function ({ browserConfiguration, seleniumEnvironment }) {
   if (!browserConfiguration) {
     throw new Error('Browser configuration is missing.');
@@ -24,8 +26,6 @@ const getTestsFor = function ({ browserConfiguration, seleniumEnvironment }) {
     suite('OpenIdConnect', function () {
       this.timeout(5 * 60 * 1000);
 
-      let browser;
-
       const applicationUrl = 'http://localhost:4567/authentication/',
             loginUrl = 'https://thenativeweb.eu.auth0.com/login',
             waitTimeout = 20 * 1000;
@@ -34,7 +34,9 @@ const getTestsFor = function ({ browserConfiguration, seleniumEnvironment }) {
         'http://localhost:4444/wd/hub' :
         `http://${processenv('SAUCE_USERNAME')}:${processenv('SAUCE_ACCESS_KEY')}@localhost:4445/wd/hub`;
 
-      const startBrowser = async () => {
+      let browser;
+
+      setup(async () => {
         browser = await new Builder().
           usingServer(seleniumUrl).
           withCapabilities(browserConfiguration).
@@ -42,18 +44,10 @@ const getTestsFor = function ({ browserConfiguration, seleniumEnvironment }) {
 
         await browser.get(applicationUrl);
         await browser.wait(until.elementLocated(By.css('#ready')), waitTimeout);
-      };
-
-      const stopBrowser = async () => {
-        await browser.quit();
-      };
-
-      setup(async () => {
-        await startBrowser();
       });
 
       teardown(async () => {
-        await stopBrowser();
+        await browser.quit();
       });
 
       const callLoginFunction = async function () {
@@ -82,9 +76,7 @@ const getTestsFor = function ({ browserConfiguration, seleniumEnvironment }) {
         await browser.wait(until.elementIsVisible(submitButton), waitTimeout);
 
         await userNameInput.sendKeys('alfred@thenativeweb.io');
-        await browser.sleep(0.1 * 1000);
         await passwordInput.sendKeys('YyKsuA6hoBUBZJbdi3jtzCERYasbCkXU');
-        await browser.sleep(0.1 * 1000);
         await submitButton.click();
       };
 
@@ -96,224 +88,109 @@ const getTestsFor = function ({ browserConfiguration, seleniumEnvironment }) {
         await browser.wait(until.elementLocated(By.css('#ready')), waitTimeout);
       };
 
-      const wrapForSauceLabs = function (fn) {
-        return async function () {
-          if (seleniumEnvironment === 'saucelabs') {
-            await browser.executeScript(`sauce:job-name=${this.test.fullTitle()}`);
-
-            try {
-              await fn();
-            } catch (ex) {
-              await browser.executeScript(`sauce:job-result=failed`);
-              throw ex;
-            }
-
-            await browser.executeScript(`sauce:job-result=passed`);
-
-            return;
-          }
-
-          await fn();
-        };
+      const performLogout = async function () {
+        /* eslint-disable prefer-arrow-callback */
+        await browser.executeScript(function () {
+          window.openIdConnect.logout();
+        });
+        /* eslint-enable prefer-arrow-callback */
       };
 
-      suite('at start', () => {
-        suite('isLoggedIn', () => {
-          test('returns false.', wrapForSauceLabs(async () => {
-            /* eslint-disable prefer-arrow-callback */
-            const result = await browser.executeScript(function () {
-              return window.openIdConnect.isLoggedIn();
-            });
-            /* eslint-enable prefer-arrow-callback */
+      /* eslint-disable prefer-arrow-callback */
+      test('authenticates users.', async function () {
+        await wrapForSauceLabs({ test: this.test, browser, seleniumEnvironment }, async () => {
+          // Assert that the user is not logged in.
+          let isLoggedIn = await browser.executeScript(function () {
+            return window.openIdConnect.isLoggedIn();
+          });
 
-            assert.that(result).is.false();
-          }));
-        });
+          assert.that(isLoggedIn).is.false();
 
-        suite('getToken', () => {
-          test('returns undefined.', wrapForSauceLabs(async () => {
-            /* eslint-disable prefer-arrow-callback */
-            const result = await browser.executeScript(function () {
-              return {
-                isTokenUndefined: window.openIdConnect.getToken() === undefined
-              };
-            });
-            /* eslint-enable prefer-arrow-callback */
+          // Assert that there is no token.
+          let token = await browser.executeScript(function () {
+            return window.openIdConnect.getToken() || 'undefined';
+          });
 
-            assert.that(result.isTokenUndefined).is.true();
-          }));
-        });
+          assert.that(token).is.equalTo('undefined');
 
-        suite('getProfile', () => {
-          test('returns undefined.', wrapForSauceLabs(async () => {
-            /* eslint-disable prefer-arrow-callback */
-            const result = await browser.executeScript(function () {
-              return {
-                isProfileUndefined: window.openIdConnect.getProfile() === undefined
-              };
-            });
-            /* eslint-enable prefer-arrow-callback */
+          // Assert that there is no profile.
+          let profile = await browser.executeScript(function () {
+            return window.openIdConnect.getProfile() || 'undefined';
+          });
 
-            assert.that(result.isProfileUndefined).is.true();
-          }));
-        });
-      });
+          assert.that(profile).is.equalTo('undefined');
 
-      suite('login', () => {
-        test('redirects to the identity provider.', wrapForSauceLabs(async () => {
-          await callLoginFunction();
-
-          await browser.wait(until.urlContains(loginUrl));
-        }));
-
-        test('redirects back to the application.', wrapForSauceLabs(async () => {
-          await callLoginFunction();
-          await fillOutLoginForm();
-
-          await browser.wait(until.urlContains(applicationUrl));
-        }));
-
-        test('removes the token from the url.', wrapForSauceLabs(async () => {
-          await performLogin();
-        }));
-
-        test('stores the token in local storage.', wrapForSauceLabs(async () => {
+          // Login the user.
           await performLogin();
 
-          /* eslint-disable prefer-arrow-callback, no-var */
-          const result = await browser.executeScript(function () {
-            var token = window.localStorage.getItem(window.openIdConnect.getKey());
-            var body = window.wolkenkit.authentication.OpenIdConnect.decodeBodyFromToken(token);
+          // Assert that the token was stored in local storage.
+          const tokenBody = await browser.executeScript(function () {
+            /* eslint-disable no-var */
+            var encodedToken = window.localStorage.getItem(window.openIdConnect.getKey());
+            var body = window.wolkenkit.authentication.OpenIdConnect.decodeBodyFromToken(encodedToken);
+            /* eslint-enable no-var */
 
             return body;
           });
-          /* eslint-enable prefer-arrow-callback, no-var */
 
-          assert.that(result).is.not.null();
-        }));
+          assert.that(tokenBody).is.not.null();
 
-        suite('isLoggedIn', () => {
-          test('returns true.', wrapForSauceLabs(async () => {
-            await performLogin();
+          // Assert that the user is logged in.
+          isLoggedIn = await browser.executeScript(function () {
+            return window.openIdConnect.isLoggedIn();
+          });
 
-            /* eslint-disable prefer-arrow-callback */
-            const result = await browser.executeScript(function () {
-              return window.openIdConnect.isLoggedIn();
-            });
-            /* eslint-enable prefer-arrow-callback */
+          assert.that(isLoggedIn).is.true();
 
-            assert.that(result).is.true();
-          }));
-        });
+          // Assert that there is a token.
+          token = await browser.executeScript(function () {
+            return window.openIdConnect.getToken() || 'undefined';
+          });
 
-        suite('getToken', () => {
-          test('returns the token.', wrapForSauceLabs(async () => {
-            await performLogin();
+          assert.that(token).is.not.equalTo('undefined');
 
-            /* eslint-disable prefer-arrow-callback */
-            const result = await browser.executeScript(function () {
-              return {
-                isTokenUndefined: window.openIdConnect.getToken() === undefined
-              };
-            });
-            /* eslint-enable prefer-arrow-callback */
+          // Assert that there is a profile.
+          profile = await browser.executeScript(function () {
+            return window.openIdConnect.getProfile() || 'undefined';
+          });
 
-            assert.that(result.isTokenUndefined).is.false();
-          }));
-        });
+          assert.that(profile).is.not.equalTo('undefined');
 
-        suite('getProfile', () => {
-          test('returns the profile.', wrapForSauceLabs(async () => {
-            await performLogin();
+          // Logout the user.
+          await performLogout();
 
-            /* eslint-disable prefer-arrow-callback */
-            const result = await browser.executeScript(function () {
-              return {
-                isProfileUndefined: window.openIdConnect.getProfile() === undefined
-              };
-            });
-            /* eslint-enable prefer-arrow-callback */
+          // Assert that the token was removed from local storage.
+          const tokenInLocalStorage = await browser.executeScript(function () {
+            /* eslint-disable no-var */
+            return window.localStorage.getItem(window.openIdConnect.getKey()) || 'undefined';
+            /* eslint-enable no-var */
+          });
 
-            assert.that(result.isProfileUndefined).is.false();
-          }));
+          assert.that(tokenInLocalStorage).is.equalTo('undefined');
+
+          // Assert that the user is not logged in.
+          isLoggedIn = await browser.executeScript(function () {
+            return window.openIdConnect.isLoggedIn();
+          });
+
+          assert.that(isLoggedIn).is.false();
+
+          // Assert that there is no token.
+          token = await browser.executeScript(function () {
+            return window.openIdConnect.getToken() || 'undefined';
+          });
+
+          assert.that(token).is.equalTo('undefined');
+
+          // Assert that there is no profile.
+          profile = await browser.executeScript(function () {
+            return window.openIdConnect.getProfile() || 'undefined';
+          });
+
+          assert.that(profile).is.equalTo('undefined');
         });
       });
-
-      suite('logout', () => {
-        const callLogoutFunction = async function () {
-          /* eslint-disable prefer-arrow-callback */
-          const result = await browser.executeScript(function () {
-            window.openIdConnect.logout();
-          });
-          /* eslint-enable prefer-arrow-callback */
-
-          return result;
-        };
-
-        test('removes the token from local storage.', wrapForSauceLabs(async () => {
-          await performLogin();
-          await callLogoutFunction();
-
-          /* eslint-disable prefer-arrow-callback, no-var */
-          const result = await browser.executeScript(function () {
-            var token = window.localStorage.getItem(window.openIdConnect.getKey());
-
-            return token;
-          });
-          /* eslint-enable prefer-arrow-callback, no-var */
-
-          assert.that(result).is.null();
-        }));
-
-        suite('isLoggedIn', () => {
-          test('returns false.', wrapForSauceLabs(async () => {
-            await performLogin();
-            await callLogoutFunction();
-
-            /* eslint-disable prefer-arrow-callback */
-            const result = await browser.executeScript(function () {
-              return window.openIdConnect.isLoggedIn();
-            });
-            /* eslint-enable prefer-arrow-callback */
-
-            assert.that(result).is.false();
-          }));
-        });
-
-        suite('getToken', () => {
-          test('returns undefined.', wrapForSauceLabs(async () => {
-            await performLogin();
-            await callLogoutFunction();
-
-            /* eslint-disable prefer-arrow-callback */
-            const result = await browser.executeScript(function () {
-              return {
-                isTokenUndefined: window.openIdConnect.getToken() === undefined
-              };
-            });
-            /* eslint-enable prefer-arrow-callback */
-
-            assert.that(result.isTokenUndefined).is.true();
-          }));
-        });
-
-        suite('getProfile', () => {
-          test('returns undefined.', wrapForSauceLabs(async () => {
-            await performLogin();
-            await callLogoutFunction();
-
-            /* eslint-disable prefer-arrow-callback */
-            const result = await browser.executeScript(function () {
-              return {
-                isProfileUndefined: window.openIdConnect.getProfile() === undefined
-              };
-            });
-            /* eslint-enable prefer-arrow-callback */
-
-            assert.that(result.isProfileUndefined).is.true();
-          }));
-        });
-      });
+      /* eslint-enable prefer-arrow-callback */
     });
   });
 };

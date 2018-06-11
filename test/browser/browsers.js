@@ -10,7 +10,11 @@ const browsers = {
     { browserName: 'Safari', platform: 'macOS 10.13', version: 'latest' },
     { browserName: 'Internet Explorer', platform: 'Windows 10', version: 'latest' },
     { browserName: 'MicrosoftEdge', platform: 'Windows 10', version: 'latest' },
-    { browserName: 'Safari', deviceName: 'iPhone Simulator', deviceOrientation: 'portrait', platformName: 'iOS', platformVersion: '11.3' },
+
+    // The iOS tests are currently disabled, as there are major problems with
+    // sending key strokes.
+    // { browserName: 'Safari', deviceName: 'iPhone Simulator', deviceOrientation: 'portrait', platformName: 'iOS', platformVersion: '11.3' },
+
     { browserName: 'Chrome', deviceName: 'Android Emulator', deviceOrientation: 'portrait', platformName: 'Android', platformVersion: '6.0' }
   ]
 };
