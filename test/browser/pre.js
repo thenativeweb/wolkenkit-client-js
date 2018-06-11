@@ -26,6 +26,15 @@ const pre = async function () {
 
   processes.httpServer = shell.exec(`npx http-server -s -p 4567 ${tempBuildDir}`, { cwd: projectRoot, async: true });
 
+  const testApplicationDirectory = path.join(__dirname, '..', 'shared', 'testApp');
+  const remoteServerBinary = path.join(__dirname, '..', 'shared', 'remote.js');
+
+  processes.remoteServer = shell.exec(`node ${remoteServerBinary}`, { async: true });
+
+  shell.exec('npx wolkenkit start --shared-key test', {
+    cwd: testApplicationDirectory
+  });
+
   if (seleniumEnvironment === 'local') {
     // Start local Selenium server.
     shell.exec(`npx selenium-standalone install`, { cwd: projectRoot });

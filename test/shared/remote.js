@@ -1,7 +1,6 @@
 'use strict';
 
-const http = require('http'),
-      path = require('path');
+const http = require('http');
 
 const bodyParser = require('body-parser'),
       cors = require('cors'),
@@ -17,7 +16,6 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(cors());
-app.use('/', express.static(path.join(__dirname, '..', 'integration')));
 
 app.post('/stop-broker', (req, res) => {
   const result = shell.exec(`docker stop test-broker`);
