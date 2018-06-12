@@ -2,7 +2,7 @@
 
 wolkenkit-client is a client to access wolkenkit applications.
 
-![wolkenkit-client](https://github.com/thenativeweb/wolkenkit-client-js/raw/master/images/logo.jpg "wolkenkit-client")
+![wolkenkit-client](images/logo.jpg "wolkenkit-client")
 
 ## Running the build
 
@@ -11,6 +11,10 @@ To build this module use [roboter](https://www.npmjs.com/package/roboter).
 ```shell
 $ npx roboter
 ```
+
+Running the tests on multiple browsers and platforms is supported by [BrowserStack](https://www.browserstack.com/), which offers this service for free to open-source projects.
+
+[![logo-browserstack](images/logo-browserstack.png "logo-browserstack")](https://www.browserstack.com/)
 
 ## Creating the minified version
 
