@@ -11,6 +11,8 @@ const processes = require('../shared/processes');
 const seleniumEnvironment = processenv('SELENIUM_ENV') || 'local';
 
 const pre = async function () {
+  // As pkill returns exit code 1 if selenium-standalone is not running, we
+  // intentionally ignore the exit code here.
   shell.exec('pkill -f selenium-standalone');
 
   const tempDistDir = path.join(__dirname, 'dist');
@@ -19,10 +21,18 @@ const pre = async function () {
 
   // Precompile and create a temporary wolkenkit-client SDK distributable, so
   // that the tests always use the latest version.
-  shell.exec(`npx babel src --out-dir ${tempDistDir} --copy-files`, { cwd: projectRoot });
+  let childProcess = shell.exec(`npx babel src --out-dir ${tempDistDir} --copy-files`, { cwd: projectRoot });
+
+  if (childProcess.code !== 0) {
+    throw new Error('Failed to create dist.');
+  }
 
   // Build and bundle the OpenID Connect client test application.
-  shell.exec(`npx webpack`, { cwd: __dirname });
+  childProcess = shell.exec(`npx webpack`, { cwd: __dirname });
+
+  if (childProcess.code !== 0) {
+    throw new Error('Failed to bundle test files.');
+  }
 
   processes.httpServer = shell.exec(`npx http-server -s -p 4567 ${tempBuildDir}`, { cwd: projectRoot, async: true });
 
@@ -31,13 +41,22 @@ const pre = async function () {
 
   processes.remoteServer = shell.exec(`node ${remoteServerBinary}`, { async: true });
 
-  shell.exec('npx wolkenkit start --shared-key test', {
+  childProcess = shell.exec('npx wolkenkit start --shared-key test', {
     cwd: testApplicationDirectory
   });
 
+  if (childProcess.code !== 0) {
+    throw new Error('Failed to start wolkenkit test application.');
+  }
+
   if (seleniumEnvironment === 'local') {
     // Start local Selenium server.
-    shell.exec(`npx selenium-standalone install`, { cwd: projectRoot });
+    childProcess = shell.exec(`npx selenium-standalone install`, { cwd: projectRoot });
+
+    if (childProcess.code !== 0) {
+      throw new Error('Failed to run selenium-standalone install.');
+    }
+
     processes.selenium = shell.exec(`npx selenium-standalone start`, { cwd: projectRoot, async: true });
 
     await new Promise(resolve => {
@@ -59,6 +78,7 @@ const pre = async function () {
     sauceConnectLauncher({
       username: processenv('SAUCE_USERNAME'),
       accessKey: processenv('SAUCE_ACCESS_KEY'),
+      noSslBumpDomains: 'all',
       verbose: true
     }, (err, sauceConnectProcess) => {
       if (err) {
