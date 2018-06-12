@@ -3,10 +3,9 @@
 /* global window */
 
 const assert = require('assertthat'),
-      { Builder, By, until } = require('selenium-webdriver'),
-      processenv = require('processenv');
+      { Builder, By, until } = require('selenium-webdriver');
 
-const wrapForSauceLabs = require('../wrapForSauceLabs');
+const wrapForBrowserstack = require('../wrapForBrowserstack');
 
 const getTestsFor = function ({ browserConfiguration, seleniumEnvironment }) {
   if (!browserConfiguration) {
@@ -19,21 +18,24 @@ const getTestsFor = function ({ browserConfiguration, seleniumEnvironment }) {
   // Tests that run on mobile devices only provide platformName and
   // platformVersion, so we need to fallback to those values manually. Tests
   // that are run on the local machine, do have neither of these values.
-  browserConfiguration.platform = browserConfiguration.platform || browserConfiguration.platformName || 'current';
-  browserConfiguration.version = browserConfiguration.version || browserConfiguration.platformVersion || 'current';
+  /* eslint-disable camelcase */
+  browserConfiguration.browser_version = browserConfiguration.browser_version || browserConfiguration.browser_version || 'current';
+  browserConfiguration.os = browserConfiguration.os || browserConfiguration.os || 'current';
+  browserConfiguration.os_version = browserConfiguration.os_version || browserConfiguration.os_version || 'current';
+  /* eslint-enable camelcase */
 
-  suite(`${browserConfiguration.browserName} ${browserConfiguration.version} (${browserConfiguration.platform})`, () => {
-    suite('Integration tests', function () {
+  suite(`${browserConfiguration.browserName} ${browserConfiguration.browser_version} (${browserConfiguration.os} ${browserConfiguration.os_version})`, () => {
+    suite('integration tests', function () {
       this.timeout(60 * 60 * 1000);
 
       let browser;
 
-      const applicationUrl = 'http://localhost:4567/integration/',
+      const applicationUrl = 'http://local.wolkenkit.io:4567/integration/',
             waitTimeout = 60 * 60 * 1000;
 
-      const seleniumUrl = seleniumEnvironment === 'local' ?
-        'http://localhost:4444/wd/hub' :
-        `http://${processenv('SAUCE_USERNAME')}:${processenv('SAUCE_ACCESS_KEY')}@localhost:4445/wd/hub`;
+      const seleniumUrl = seleniumEnvironment === 'browserstack' ?
+        `http://hub-cloud.browserstack.com/wd/hub` :
+        'http://localhost:4444/wd/hub';
 
       setup(async () => {
         browser = await new Builder().
@@ -48,8 +50,8 @@ const getTestsFor = function ({ browserConfiguration, seleniumEnvironment }) {
         await browser.quit();
       });
 
-      test('all run successfully inside the browser.', async function () {
-        await wrapForSauceLabs({ test: this.test, browser, seleniumEnvironment }, async () => {
+      test('runs all tests successfully inside the browser.', async function () {
+        await wrapForBrowserstack({ test: this.test, browser, seleniumEnvironment }, async () => {
           await browser.wait(until.elementLocated(By.css('#passes')), waitTimeout);
 
           /* eslint-disable prefer-arrow-callback */

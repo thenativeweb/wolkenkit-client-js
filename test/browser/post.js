@@ -7,9 +7,9 @@ const shell = require('shelljs');
 const processes = require('../shared/processes');
 
 const post = async function () {
-  Object.keys(processes).forEach(processName => {
-    processes[processName].kill('SIGINT');
-  });
+  for (const [ , processToKill ] of Object.entries(processes)) {
+    await processToKill.kill('SIGINT');
+  }
 
   const tempDistDir = path.join(__dirname, 'dist');
   const buildDir = path.join(__dirname, 'build');

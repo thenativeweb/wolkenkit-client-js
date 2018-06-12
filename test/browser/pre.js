@@ -2,8 +2,8 @@
 
 const path = require('path');
 
-const processenv = require('processenv'),
-      sauceConnectLauncher = require('sauce-connect-launcher'),
+const { Local } = require('browserstack-local'),
+      processenv = require('processenv'),
       shell = require('shelljs');
 
 const processes = require('../shared/processes');
@@ -49,50 +49,55 @@ const pre = async function () {
     throw new Error('Failed to start wolkenkit test application.');
   }
 
-  if (seleniumEnvironment === 'local') {
-    // Start local Selenium server.
-    childProcess = shell.exec(`npx selenium-standalone install`, { cwd: projectRoot });
+  if (seleniumEnvironment === 'browserstack') {
+    const local = new Local();
 
-    if (childProcess.code !== 0) {
-      throw new Error('Failed to run selenium-standalone install.');
-    }
-
-    processes.selenium = shell.exec(`npx selenium-standalone start`, { cwd: projectRoot, async: true });
-
-    await new Promise(resolve => {
-      const onData = function (data) {
-        if (data.includes('Selenium started')) {
-          processes.selenium.stdout.removeListener('data', onData);
-          resolve();
+    await new Promise((resolve, reject) => {
+      local.start({
+        key: processenv('BROWSERSTACK_ACCESS_KEY')
+      }, err => {
+        if (err) {
+          return reject(err);
         }
-      };
 
-      processes.selenium.stdout.on('data', onData);
+        processes.browserstack = {
+          async kill () {
+            await new Promise((resolveStop, rejectStop) => {
+              local.stop(errStop => {
+                if (errStop) {
+                  return rejectStop(errStop);
+                }
+                resolveStop();
+              });
+            });
+          }
+        };
+
+        resolve();
+      });
     });
 
     return;
   }
 
-  // Connect to SauceLabs via secure tunnel using sauce connect.
-  await new Promise((resolve, reject) => {
-    sauceConnectLauncher({
-      username: processenv('SAUCE_USERNAME'),
-      accessKey: processenv('SAUCE_ACCESS_KEY'),
-      noSslBumpDomains: 'all',
-      verbose: true
-    }, (err, sauceConnectProcess) => {
-      if (err) {
-        /* eslint-disable no-console */
-        console.error(err);
-        /* eslint-enable no-console */
+  // Start local Selenium server.
+  childProcess = shell.exec(`npx selenium-standalone install`, { cwd: projectRoot });
 
-        return reject(err);
+  if (childProcess.code !== 0) {
+    throw new Error('Failed to run selenium-standalone install.');
+  }
+
+  processes.selenium = shell.exec(`npx selenium-standalone start`, { cwd: projectRoot, async: true });
+
+  await new Promise(resolve => {
+    const onData = function (data) {
+      if (data.includes('Selenium started')) {
+        processes.selenium.stdout.removeListener('data', onData);
+        resolve();
       }
+    };
 
-      processes.sauceConnect = sauceConnectProcess;
-
-      resolve();
-    });
+    processes.selenium.stdout.on('data', onData);
   });
 };
 

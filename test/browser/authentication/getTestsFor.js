@@ -3,10 +3,9 @@
 /* global window */
 
 const assert = require('assertthat'),
-      { Builder, By, until } = require('selenium-webdriver'),
-      processenv = require('processenv');
+      { Builder, By, until } = require('selenium-webdriver');
 
-const wrapForSauceLabs = require('../wrapForSauceLabs');
+const wrapForBrowserstack = require('../wrapForBrowserstack');
 
 const getTestsFor = function ({ browserConfiguration, seleniumEnvironment }) {
   if (!browserConfiguration) {
@@ -19,20 +18,35 @@ const getTestsFor = function ({ browserConfiguration, seleniumEnvironment }) {
   // Tests that run on mobile devices only provide platformName and
   // platformVersion, so we need to fallback to those values manually. Tests
   // that are run on the local machine, do have neither of these values.
-  browserConfiguration.platform = browserConfiguration.platform || browserConfiguration.platformName || 'current';
-  browserConfiguration.version = browserConfiguration.version || browserConfiguration.platformVersion || 'current';
+  /* eslint-disable camelcase */
+  browserConfiguration.browser_version = browserConfiguration.browser_version || browserConfiguration.browser_version || 'current';
+  browserConfiguration.os = browserConfiguration.os || browserConfiguration.os || 'current';
+  browserConfiguration.os_version = browserConfiguration.os_version || browserConfiguration.os_version || 'current';
+  /* eslint-enable camelcase */
 
-  suite(`${browserConfiguration.browserName} ${browserConfiguration.version} (${browserConfiguration.platform})`, () => {
+  const sendKeys = async function (element, text) {
+    await element.sendKeys(text);
+
+    const receivedValue = await element.getAttribute('value');
+
+    if (receivedValue === text) {
+      return;
+    }
+
+    await sendKeys(element, text);
+  };
+
+  suite(`${browserConfiguration.browserName} ${browserConfiguration.browser_version} (${browserConfiguration.os} ${browserConfiguration.os_version})`, () => {
     suite('OpenIdConnect', function () {
       this.timeout(5 * 60 * 1000);
 
-      const applicationUrl = 'http://localhost:4567/authentication/',
+      const applicationUrl = 'http://local.wolkenkit.io:4567/authentication/',
             loginUrl = 'https://thenativeweb.eu.auth0.com/login',
             waitTimeout = 20 * 1000;
 
-      const seleniumUrl = seleniumEnvironment === 'local' ?
-        'http://localhost:4444/wd/hub' :
-        `http://${processenv('SAUCE_USERNAME')}:${processenv('SAUCE_ACCESS_KEY')}@localhost:4445/wd/hub`;
+      const seleniumUrl = seleniumEnvironment === 'browserstack' ?
+        `http://hub-cloud.browserstack.com/wd/hub` :
+        'http://localhost:4444/wd/hub';
 
       let browser;
 
@@ -75,8 +89,8 @@ const getTestsFor = function ({ browserConfiguration, seleniumEnvironment }) {
         await browser.wait(until.elementIsVisible(passwordInput), waitTimeout);
         await browser.wait(until.elementIsVisible(submitButton), waitTimeout);
 
-        await userNameInput.sendKeys('alfred@thenativeweb.io');
-        await passwordInput.sendKeys('YyKsuA6hoBUBZJbdi3jtzCERYasbCkXU');
+        await sendKeys(userNameInput, 'alfred@thenativeweb.io');
+        await sendKeys(passwordInput, 'YyKsuA6hoBUBZJbdi3jtzCERYasbCkXU');
         await submitButton.click();
       };
 
@@ -98,7 +112,7 @@ const getTestsFor = function ({ browserConfiguration, seleniumEnvironment }) {
 
       /* eslint-disable prefer-arrow-callback */
       test('authenticates users.', async function () {
-        await wrapForSauceLabs({ test: this.test, browser, seleniumEnvironment }, async () => {
+        await wrapForBrowserstack({ test: this.test, browser, seleniumEnvironment }, async () => {
           // Assert that the user is not logged in.
           let isLoggedIn = await browser.executeScript(function () {
             return window.openIdConnect.isLoggedIn();

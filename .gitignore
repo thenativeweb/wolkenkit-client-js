@@ -6,6 +6,10 @@
 .DS_Store
 npm-debug.log
 
+# BrowserStack files and folders
+local.log
+
+# Other files and folders
 test/browser/dist/
 test/browser/build/
 test/integration/dist/
