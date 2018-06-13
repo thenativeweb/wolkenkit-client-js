@@ -1,15 +1,23 @@
 'use strict';
 
-const assert = require('assertthat');
+const stream = require('stream');
+
+const assert = require('assertthat'),
+      merge = require('lodash/merge');
 
 const CommandRunner = require('../../../src/apiBuilder/CommandRunner'),
+      FakeWire = require('../../shared/FakeWire'),
       getApp = require('../../../src/getApp'),
+      getEventsApi = require('../../../src/apiBuilder/getEventsApi'),
       getWriteModelApi = require('../../../src/apiBuilder/getWriteModelApi'),
       None = require('../../../src/authentication/None'),
       sampleConfiguration = require('../../shared/data/sampleConfiguration.json');
 
+const PassThrough = stream.PassThrough;
+
 suite('getWriteModelApi', () => {
-  let app;
+  let app,
+      wire;
 
   setup(done => {
     getApp({
@@ -20,7 +28,13 @@ suite('getWriteModelApi', () => {
       configuration: sampleConfiguration
     }).
       then(_app => {
-        app = _app;
+        wire = new FakeWire({});
+
+        const eventsApi = getEventsApi({ wire, writeModel: sampleConfiguration.writeModel }),
+              writeModelApi = getWriteModelApi({ app: _app, wire, writeModel: sampleConfiguration.writeModel });
+
+        app = merge({}, _app, eventsApi, writeModelApi);
+
         done();
       }).
       catch(done);
@@ -60,7 +74,28 @@ suite('getWriteModelApi', () => {
   });
 
   test('returns the write model API.', done => {
-    const writeModelApi = getWriteModelApi({ app, wire: {}, writeModel: sampleConfiguration.writeModel });
+    wire.subscribeToEvents = function () {
+      const fakeEventStream = new PassThrough({ objectMode: true });
+
+      // In a minute, start the event stream so that the command runner detects
+      // a connection.
+      setTimeout(() => fakeEventStream.emit('start'), 0.1 * 1000);
+
+      return {
+        stream: fakeEventStream,
+        cancel () {}
+      };
+    };
+
+    wire.sendCommand = function () {
+      return Promise.reject(new Error());
+    };
+
+    const writeModelApi = getWriteModelApi({
+      app,
+      wire,
+      writeModel: sampleConfiguration.writeModel
+    });
 
     assert.that(writeModelApi.network).is.ofType('object');
     assert.that(writeModelApi.foo).is.ofType('object');

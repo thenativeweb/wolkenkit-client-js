@@ -4,13 +4,7 @@
   <meta charset="utf-8">
   <title>Mocha Tests</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/mocha/5.2.0/mocha.css" rel="stylesheet" />
-</head>
-<body>
-  <div id="mocha"></div>
-  <div id="result"></div>
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mocha/5.2.0/mocha.js"></script>
-
   <script>
     mocha.setup({
       ui: 'tdd',
@@ -18,7 +12,12 @@
       invert: true
     });
   </script>
-  <script src="dist/tests.js"></script>
+  <!-- Test script will be injected via WebpackHtmlPlugin here -->
+</head>
+<body>
+  <div id="mocha"></div>
+  <div id="result"></div>
+
   <script>
     var runner = mocha.run();
     var failedTests = [];
@@ -43,9 +42,9 @@
     });
 
     runner.on('end', function() {
-      document.querySelector('#result').innerHTML = '<div id="finished">' + runner.stats.failures + '</div>'
       window.mochaResults = runner.stats;
       window.mochaResults.reports = failedTests;
+      document.querySelector('#result').innerHTML = '<div id="failures">' + runner.stats.failures + '</div><div id="passes">' + runner.stats.passes + '</div>';
     });
   </script>
 </body>

@@ -6,17 +6,17 @@ const shell = require('shelljs');
 
 const processes = require('../shared/processes');
 
-const wolkenkitDirectory = path.join(__dirname, '..', '..', 'node_modules', 'wolkenkit-test');
+const testApplicationDirectory = path.join(__dirname, '..', 'shared', 'testApp');
 const wolkenkitBinary = path.join(__dirname, '..', '..', 'node_modules', '.bin', 'wolkenkit');
 
-const post = function (done) {
+const post = async function () {
   if (processes.remote) {
     processes.remote.kill('SIGINT');
   }
 
   shell.exec(`${wolkenkitBinary} stop --dangerously-destroy-data`, {
-    cwd: wolkenkitDirectory
-  }, done);
+    cwd: testApplicationDirectory
+  });
 };
 
 module.exports = post;

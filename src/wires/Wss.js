@@ -4,8 +4,11 @@ const events = require('events'),
       stream = require('stream');
 
 const Promise = require('es6-promise').Promise,
-      uuid = require('uuidv4'),
-      WebSocket = require('ws');
+      uuid = require('uuidv4');
+
+/* eslint-disable no-undef */
+const WebSocket = typeof window !== 'undefined' ? window.WebSocket : require('ws');
+/* eslint-enable no-undef */
 
 const EventEmitter = events.EventEmitter,
       PassThrough = stream.PassThrough;

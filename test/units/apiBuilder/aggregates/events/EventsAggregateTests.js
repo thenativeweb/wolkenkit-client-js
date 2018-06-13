@@ -83,32 +83,52 @@ suite('EventsAggregate', () => {
     test('requests events from the cloud.', done => {
       const wire = new FakeWire({
         subscribeToEvents (filter) {
+          const fakeEventStream = new PassThrough({ objectMode: true });
+
           assert.that(filter).is.equalTo({
             type: 'domain'
           });
-          done();
+
+          setTimeout(() => {
+            fakeEventStream.emit('start');
+          }, 100);
+
+          return {
+            stream: fakeEventStream
+          };
         }
       });
       const eventsAggregate = new EventsAggregate({ wire, writeModel: sampleWriteModel });
 
-      eventsAggregate.observe();
+      eventsAggregate.observe().
+        started(() => done());
     });
 
     test('requests events from the server using the specified filter.', done => {
       const wire = new FakeWire({
         subscribeToEvents (filter) {
+          const fakeEventStream = new PassThrough({ objectMode: true });
+
           assert.that(filter).is.equalTo({
             type: 'domain',
             name: 'pinged'
           });
-          done();
+
+          setTimeout(() => {
+            fakeEventStream.emit('start');
+          }, 100);
+
+          return {
+            stream: fakeEventStream
+          };
         }
       });
       const eventsAggregate = new EventsAggregate({ wire, writeModel: sampleWriteModel });
 
       eventsAggregate.observe({
         where: { name: 'pinged' }
-      });
+      }).
+        started(() => done());
     });
 
     suite('started', () => {
