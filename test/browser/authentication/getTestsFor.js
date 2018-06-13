@@ -24,18 +24,6 @@ const getTestsFor = function ({ browserConfiguration, seleniumEnvironment }) {
   browserConfiguration.os_version = browserConfiguration.os_version || browserConfiguration.os_version || 'current';
   /* eslint-enable camelcase */
 
-  const sendKeys = async function (element, text) {
-    await element.sendKeys(text);
-
-    const receivedValue = await element.getAttribute('value');
-
-    if (receivedValue === text) {
-      return;
-    }
-
-    await sendKeys(element, text);
-  };
-
   suite(`${browserConfiguration.browserName} ${browserConfiguration.browser_version} (${browserConfiguration.os} ${browserConfiguration.os_version})`, () => {
     suite('OpenIdConnect', function () {
       this.timeout(5 * 60 * 1000);
@@ -89,8 +77,9 @@ const getTestsFor = function ({ browserConfiguration, seleniumEnvironment }) {
         await browser.wait(until.elementIsVisible(passwordInput), waitTimeout);
         await browser.wait(until.elementIsVisible(submitButton), waitTimeout);
 
-        await sendKeys(userNameInput, 'alfred@thenativeweb.io');
-        await sendKeys(passwordInput, 'YyKsuA6hoBUBZJbdi3jtzCERYasbCkXU');
+        await userNameInput.sendKeys('alfred@thenativeweb.io');
+        await passwordInput.sendKeys('YyKsuA6hoBUBZJbdi3jtzCERYasbCkXU');
+
         await submitButton.click();
       };
 
