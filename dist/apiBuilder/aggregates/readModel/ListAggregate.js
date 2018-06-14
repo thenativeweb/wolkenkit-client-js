@@ -1,8 +1,7 @@
 'use strict';
 
-const datasette = require('datasette');
-
 const areDifferent = require('./areDifferent'),
+      IsDirty = require('./IsDirty'),
       readSnapshot = require('./readSnapshot');
 
 const Readable = function (options) {
@@ -125,10 +124,10 @@ Readable.prototype.readAndObserve = function (query) {
 
     const observeStream = events.stream;
 
-    const isDirty = datasette.create(),
+    const isDirty = new IsDirty(),
           result = [];
 
-    isDirty.set('value', false);
+    isDirty.set(false);
 
     let cancel, onObserveStreamData, onObserveStreamEnd, onObserveStreamError, onObserveStreamStart;
 
@@ -140,7 +139,7 @@ Readable.prototype.readAndObserve = function (query) {
     };
 
     const readAndWaitForUpdates = function () {
-      isDirty.set('value', false);
+      isDirty.set(false);
 
       readSnapshot({ modelStore, modelType, modelName, query }, (err, snapshot) => {
         if (err) {
@@ -160,10 +159,10 @@ Readable.prototype.readAndObserve = function (query) {
           process.nextTick(() => readAndWaitForUpdates());
         };
 
-        if (isDirty.get('value')) {
+        if (isDirty.get()) {
           onIsDirty();
         } else {
-          isDirty.once('changed', onIsDirty);
+          isDirty.once('set', onIsDirty);
         }
       });
     };
@@ -179,7 +178,7 @@ Readable.prototype.readAndObserve = function (query) {
     };
 
     onObserveStreamData = function () {
-      isDirty.set('value', true);
+      isDirty.set(true);
     };
 
     onObserveStreamEnd = function () {
