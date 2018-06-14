@@ -60,6 +60,12 @@ const getTestsFor = function ({ browserConfiguration, seleniumEnvironment }) {
           });
           /* eslint-enable prefer-arrow-callback */
 
+          if (result.failures > 0) {
+            /* eslint-disable no-console */
+            console.log(result.reports);
+            /* eslint-enable no-console */
+          }
+
           assert.that(result.failures).is.equalTo(0);
           assert.that(result.pending).is.equalTo(0);
           assert.that(result.passes).is.equalTo(result.tests);

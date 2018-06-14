@@ -11,11 +11,6 @@ const post = async function () {
     await processToKill.kill('SIGINT');
   }
 
-  const tempDistDir = path.join(__dirname, 'dist');
-  const buildDir = path.join(__dirname, 'build');
-
-  shell.rm('-rf', [ tempDistDir, buildDir ]);
-
   const testApplicationDirectory = path.join(__dirname, '..', 'shared', 'testApp');
 
   const childProcess = shell.exec('npx wolkenkit stop --dangerously-destroy-data', {

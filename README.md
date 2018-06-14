@@ -4,6 +4,10 @@ wolkenkit-client is a client to access wolkenkit applications.
 
 ![wolkenkit-client](images/logo.jpg "wolkenkit-client")
 
+## Documentation
+
+See [https://docs.wolkenkit.io/latest/reference/building-a-client/connecting-to-an-application/](Buildling a client) on how to use this module to build a client that connects to a [wolkenkit](https://www.wolkenkit.io) application.
+
 ## Running the build
 
 To build this module use [roboter](https://www.npmjs.com/package/roboter).

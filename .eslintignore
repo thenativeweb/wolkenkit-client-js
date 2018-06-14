@@ -1,1 +1,3 @@
-test/integration/dist/tests.js
+/bundle/
+build/
+/test/integration/dist/tests.js

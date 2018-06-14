@@ -16,10 +16,12 @@
       "email": "mail@michael-scherer.net"
     }
   ],
-  "main": "dist/wolkenkit-client.node.js",
+  "main": "dist/wolkenkitClient.js",
   "browser": {
+    "./dist/authentication/index.js": "./dist/authentication/index-browser.js",
     "http": "http-browserify-2/http",
-    "https": "http-browserify-2/https"
+    "https": "http-browserify-2/https",
+    "ws": "./dist/wires/ws-browser.js"
   },
   "dependencies": {
     "async": "2.6.0",
@@ -60,13 +62,14 @@
     "shelljs": "0.7.8",
     "superagent": "3.8.1",
     "webpack": "4.12.0",
+    "webpack-bundle-analyzer": "2.13.1",
     "webpack-cli": "3.0.3",
     "webpack-node-externals": "1.6.0",
+    "webpack-serve": "1.0.4",
     "wolkenkit": "1.2.4"
   },
   "scripts": {
-    "dist": "npx webpack --config webpack.config.js",
-    "test-e2e": "echo '' && echo 'To run the e2e tests, run the following command:' && echo '' && echo '  npx webpack --config webpack.browser-tests.config.js && npx wdio test/e2e/wdio.config.js' && echo ''"
+    "bundle": "babel src --out-dir dist --copy-files && webpack"
   },
   "repository": {
     "type": "git",

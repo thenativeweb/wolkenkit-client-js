@@ -11,20 +11,25 @@ const processes = require('../shared/processes');
 const seleniumEnvironment = processenv('SELENIUM_ENV') || 'local';
 
 const pre = async function () {
+  // Remove temporary dist and build folders from previous tests
+  shell.rm('-rf', [
+    path.join(__dirname, 'dist'),
+    path.join(__dirname, 'build')
+  ]);
+
   // As pkill returns exit code 1 if selenium-standalone is not running, we
   // intentionally ignore the exit code here.
   shell.exec('pkill -f selenium-standalone');
 
-  const tempDistDir = path.join(__dirname, 'dist');
   const tempBuildDir = path.join(__dirname, 'build');
   const projectRoot = path.join(__dirname, '..', '..');
 
   // Precompile and create a temporary wolkenkit-client SDK distributable, so
   // that the tests always use the latest version.
-  let childProcess = shell.exec(`npx babel src --out-dir ${tempDistDir} --copy-files`, { cwd: projectRoot });
+  let childProcess = shell.exec(`npx roboter bundle`, { cwd: projectRoot });
 
   if (childProcess.code !== 0) {
-    throw new Error('Failed to create dist.');
+    throw new Error('Failed to create bundle.');
   }
 
   // Build and bundle the OpenID Connect client test application.

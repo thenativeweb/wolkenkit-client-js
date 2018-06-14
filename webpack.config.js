@@ -2,65 +2,26 @@
 
 const path = require('path');
 
-const merge = require('lodash/merge'),
-      nodeExternals = require('webpack-node-externals'),
-      webpack = require('webpack');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer'),
+      processenv = require('processenv');
 
-const configurationBase = {
-  bail: true,
-  entry: path.join(__dirname, 'src', 'wolkenkitClient.js'),
+const configuration = {
+  entry: path.join(__dirname, 'dist', 'wolkenkitClient.js'),
+  mode: 'production',
+  target: 'web',
   output: {
-    path: path.resolve(__dirname, 'dist')
+    path: path.resolve(__dirname, 'bundle'),
+    filename: 'wolkenkitClient.js',
+    libraryTarget: 'umd'
   },
-  module: {
-    rules: [
-      {
-        test: /\.js$/,
-        use: [
-          {
-            loader: 'babel-loader',
-            options: {
-              babelrc: false,
-              presets: [ 'env' ]
-            }
-          }
-        ]
-      }
-    ]
-  },
-  plugins: [
-    new webpack.DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify('production') })
-  ]
+  plugins: []
 };
 
-const configurationBrowser = merge({}, configurationBase, {
-  output: {
-    filename: 'wolkenkit-client.browser.js',
-    library: 'wolkenkit',
-    libraryTarget: 'umd'
-  },
-  target: 'web'
-});
+if (processenv('ANALYZE_BUNDLE')) {
+  configuration.plugins.push(new BundleAnalyzerPlugin({
+    analyzerMode: 'static',
+    openAnalyzer: false
+  }));
+}
 
-const configurationBrowserMin = merge({}, configurationBase, {
-  output: {
-    filename: 'wolkenkit-client.browser.min.js',
-    library: 'wolkenkit',
-    libraryTarget: 'umd'
-  },
-  target: 'web',
-  plugins: [
-    new webpack.optimize.UglifyJsPlugin()
-  ]
-});
-
-const configurationNode = merge({}, configurationBase, {
-  output: {
-    filename: 'wolkenkit-client.node.js',
-    libraryTarget: 'commonjs2'
-  },
-  target: 'node',
-  externals: [ nodeExternals() ]
-});
-
-module.exports = [ configurationBrowser, configurationBrowserMin, configurationNode ];
+module.exports = configuration;

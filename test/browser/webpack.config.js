@@ -6,15 +6,18 @@ const HtmlWebpackPlugin = require('html-webpack-plugin'),
       processenv = require('processenv'),
       webpack = require('webpack');
 
+const pathToWolkenkitBundle = path.join(__dirname, '..', '..', 'bundle', 'wolkenkitClient.js');
+
 const configurationAuthentication = {
   entry: path.join(__dirname, 'authentication', 'openIdConnectClient', 'index.js'),
   mode: 'development',
+  target: 'web',
   output: {
     path: path.resolve(__dirname, 'build', 'authentication'),
     filename: 'openIdConnectClient.js'
   },
   resolve: {
-    alias: { 'wolkenkit-client': path.join(__dirname, 'dist', 'wolkenkitClient.js') }
+    alias: { 'wolkenkit-client': pathToWolkenkitBundle }
   },
   module: {
     rules: [
@@ -32,10 +35,10 @@ const configurationIntegration = {
   mode: 'development',
   output: {
     path: path.resolve(__dirname, 'build', 'integration'),
-    filename: 'integrationTests.js'
+    filename: 'integration.js'
   },
   resolve: {
-    alias: { '../../wolkenkit-client': path.join(__dirname, 'dist', 'wolkenkitClient.js') }
+    alias: { '../../src/wolkenkitClient': pathToWolkenkitBundle }
   },
   target: 'web',
   module: {

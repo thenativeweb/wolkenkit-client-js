@@ -11,7 +11,7 @@ const EventEmitter = events.EventEmitter,
       PassThrough = stream.PassThrough;
 
 class Wss extends EventEmitter {
-  constructor (options) {
+  constructor(options) {
     if (!options) {
       throw new Error('Options are missing.');
     }
@@ -60,7 +60,7 @@ class Wss extends EventEmitter {
     };
   }
 
-  sendCommand (command) {
+  sendCommand(command) {
     if (!command) {
       throw new Error('Command is missing.');
     }
@@ -106,7 +106,7 @@ class Wss extends EventEmitter {
     });
   }
 
-  subscribeToEvents (filter) {
+  subscribeToEvents(filter) {
     filter = filter || {};
 
     const { app, socket } = this;
@@ -129,8 +129,7 @@ class Wss extends EventEmitter {
 
     const subscriptionStream = new PassThrough({ objectMode: true });
 
-    let onSubscriptionFinish,
-        onSubscriptionMessage;
+    let onSubscriptionFinish, onSubscriptionMessage;
 
     const unsubscribe = () => {
       subscriptionStream.removeListener('finish', onSubscriptionFinish);
@@ -205,7 +204,7 @@ class Wss extends EventEmitter {
     return { stream: subscriptionStream, cancel: cancelSubscription };
   }
 
-  readModel (options) {
+  readModel(options) {
     if (!options) {
       throw new Error('Options are missing.');
     }
@@ -256,8 +255,7 @@ class Wss extends EventEmitter {
 
     const modelStream = new PassThrough({ objectMode: true });
 
-    let onModelFinish,
-        onModelMessage;
+    let onModelFinish, onModelMessage;
 
     const unsubscribe = () => {
       modelStream.removeListener('finish', onModelFinish);
