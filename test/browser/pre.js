@@ -46,7 +46,7 @@ const pre = async function () {
 
   processes.remoteServer = shell.exec(`node ${remoteServerBinary}`, { async: true });
 
-  childProcess = shell.exec('npx wolkenkit start --shared-key test', {
+  childProcess = shell.exec('npx wolkenkit start --shared-key wolkenkit', {
     cwd: testApplicationDirectory
   });
 
