@@ -1,22 +1,22 @@
 'use strict';
 
-const events = require('events');
+var events = require('events');
 
-const merge = require('lodash/merge'),
-      Promise = require('es6-promise').Promise;
+var merge = require('lodash/merge'),
+    Promise = require('es6-promise').Promise;
 
-const ConfigurationWatcher = require('./ConfigurationWatcher'),
-      getEventsApi = require('./apiBuilder/getEventsApi'),
-      getReadModelApi = require('./apiBuilder/getReadModelApi'),
-      getWriteModelApi = require('./apiBuilder/getWriteModelApi'),
-      ListStore = require('./modelStoreBroker').ListStore,
-      ModelStore = require('./ModelStore'),
-      NetworkConnection = require('./NetworkConnection'),
-      wires = require('./wires');
+var ConfigurationWatcher = require('./ConfigurationWatcher'),
+    getEventsApi = require('./apiBuilder/getEventsApi'),
+    getReadModelApi = require('./apiBuilder/getReadModelApi'),
+    getWriteModelApi = require('./apiBuilder/getWriteModelApi'),
+    ListStore = require('./modelStoreBroker').ListStore,
+    ModelStore = require('./ModelStore'),
+    NetworkConnection = require('./NetworkConnection'),
+    wires = require('./wires');
 
-const EventEmitter = events.EventEmitter;
+var EventEmitter = events.EventEmitter;
 
-const getApp = function (options) {
+var getApp = function getApp(options) {
   if (!options) {
     throw new Error('Options are missing.');
   }
@@ -33,45 +33,52 @@ const getApp = function (options) {
     throw new Error('Authentication is missing.');
   }
 
-  const { host, port, protocol, authentication } = options;
+  var host = options.host,
+      port = options.port,
+      protocol = options.protocol,
+      authentication = options.authentication;
 
-  return new Promise((resolve, reject) => {
-    const app = new EventEmitter();
 
-    const networkConnection = new NetworkConnection({ host, port });
-    const configurationWatcher = new ConfigurationWatcher({
-      networkConnection,
+  return new Promise(function (resolve, reject) {
+    var app = new EventEmitter();
+
+    var networkConnection = new NetworkConnection({ host: host, port: port });
+    var configurationWatcher = new ConfigurationWatcher({
+      networkConnection: networkConnection,
       configuration: options.configuration
     });
 
-    const modelStore = new ModelStore();
+    var modelStore = new ModelStore();
 
-    const Wire = wires[protocol],
-          wire = new Wire({ app, host, port });
+    var Wire = wires[protocol],
+        wire = new Wire({ app: app, host: host, port: port });
 
-    let configuration,
+    var configuration = void 0,
         hasErrored = false,
         isWireConnected = false;
 
-    const runApplication = function () {
+    var runApplication = function runApplication() {
       if (hasErrored) {
         return;
       }
 
-      const { readModel, writeModel } = configuration;
+      var _configuration = configuration,
+          readModel = _configuration.readModel,
+          writeModel = _configuration.writeModel;
+
 
       modelStore.initialize({
         stores: {
-          lists: new ListStore({ wire })
+          lists: new ListStore({ wire: wire })
         }
-      }, err => {
+      }, function (err) {
         if (err) {
           return reject(err);
         }
 
-        const eventsApi = getEventsApi({ wire, writeModel }),
-              readModelApi = getReadModelApi({ wire, readModel, modelStore }),
-              writeModelApi = getWriteModelApi({ app, wire, writeModel });
+        var eventsApi = getEventsApi({ wire: wire, writeModel: writeModel }),
+            readModelApi = getReadModelApi({ wire: wire, readModel: readModel, modelStore: modelStore }),
+            writeModelApi = getWriteModelApi({ app: app, wire: wire, writeModel: writeModel });
 
         merge(app, eventsApi, writeModelApi, readModelApi);
 
@@ -79,11 +86,11 @@ const getApp = function (options) {
       });
     };
 
-    const onAuthenticationRequired = function () {
+    var onAuthenticationRequired = function onAuthenticationRequired() {
       app.auth.login();
     };
 
-    const onWireConnect = function () {
+    var onWireConnect = function onWireConnect() {
       isWireConnected = true;
 
       if (isWireConnected && configuration) {
@@ -91,19 +98,19 @@ const getApp = function (options) {
       }
     };
 
-    const onWireError = function (err) {
+    var onWireError = function onWireError(err) {
       app.emit('error', err);
     };
 
-    const onOnline = function () {
+    var onOnline = function onOnline() {
       app.emit('connected');
     };
 
-    const onOffline = function () {
+    var onOffline = function onOffline() {
       app.emit('disconnected');
     };
 
-    const onConfigurationFetched = function (fetchedConfiguration) {
+    var onConfigurationFetched = function onConfigurationFetched(fetchedConfiguration) {
       configuration = fetchedConfiguration;
 
       if (isWireConnected && configuration) {
@@ -111,7 +118,7 @@ const getApp = function (options) {
       }
     };
 
-    const onConfigurationError = function (err) {
+    var onConfigurationError = function onConfigurationError(err) {
       hasErrored = true;
 
       // If there was an error fetching the configuration while starting the
@@ -126,7 +133,7 @@ const getApp = function (options) {
       app.emit('error', err);
     };
 
-    const onConfigurationOutdated = function () {
+    var onConfigurationOutdated = function onConfigurationOutdated() {
       app.emit('outdated');
     };
 

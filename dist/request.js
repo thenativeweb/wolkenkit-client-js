@@ -1,8 +1,8 @@
 'use strict';
 
-const https = require('https');
+var https = require('https');
 
-const request = function (options, reqData, callback) {
+var request = function request(options, reqData, callback) {
   if (!options) {
     throw new Error('Options are missing.');
   }
@@ -14,34 +14,34 @@ const request = function (options, reqData, callback) {
     throw new Error('Callback is missing.');
   }
 
-  let hasErrored = false,
-      onReqError,
-      unsubscribeReq,
-      unsubscribeRes;
+  var hasErrored = false,
+      onReqError = void 0,
+      unsubscribeReq = void 0,
+      unsubscribeRes = void 0;
 
-  const req = https.request(options, res => {
-    let body = '',
-        onResData,
-        onResEnd,
-        onResError;
+  var req = https.request(options, function (res) {
+    var body = '',
+        onResData = void 0,
+        onResEnd = void 0,
+        onResError = void 0;
 
-    unsubscribeRes = function () {
+    unsubscribeRes = function unsubscribeRes() {
       res.removeListener('data', onResData);
       res.removeListener('end', onResEnd);
       res.removeListener('error', onResError);
     };
 
-    onResData = function (data) {
+    onResData = function onResData(data) {
       body += data;
     };
 
-    onResEnd = function () {
+    onResEnd = function onResEnd() {
       unsubscribeReq();
       unsubscribeRes();
-      callback(null, { statusCode: res.statusCode, body });
+      callback(null, { statusCode: res.statusCode, body: body });
     };
 
-    onResError = function (err) {
+    onResError = function onResError(err) {
       if (hasErrored) {
         return;
       }
@@ -59,11 +59,11 @@ const request = function (options, reqData, callback) {
     res.on('error', onResError);
   });
 
-  unsubscribeReq = function () {
+  unsubscribeReq = function unsubscribeReq() {
     req.removeListener('error', onReqError);
   };
 
-  onReqError = function (err) {
+  onReqError = function onReqError(err) {
     if (hasErrored) {
       return;
     }

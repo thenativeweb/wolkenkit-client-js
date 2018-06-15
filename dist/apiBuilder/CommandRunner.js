@@ -1,14 +1,16 @@
 'use strict';
 
-const flatten = require('lodash/flatten'),
-      parseDuration = require('parse-duration');
+var flatten = require('lodash/flatten'),
+    parseDuration = require('parse-duration');
 
-const errors = require('../errors');
+var errors = require('../errors');
 
-const defaultTimeoutDuration = parseDuration('120s'),
-      disabledTimeoutDuration = parseDuration('0s');
+var defaultTimeoutDuration = parseDuration('120s'),
+    disabledTimeoutDuration = parseDuration('0s');
 
-const CommandRunner = function (options) {
+var CommandRunner = function CommandRunner(options) {
+  var _this = this;
+
   if (!options) {
     throw new Error('Options are missing.');
   }
@@ -22,19 +24,22 @@ const CommandRunner = function (options) {
     throw new Error('Command is missing.');
   }
 
-  const { app, wire, command } = options;
+  var app = options.app,
+      wire = options.wire,
+      command = options.command;
+
 
   this.app = app;
   this.command = command;
   this.aggregate = app[command.context.name][command.aggregate.name];
 
   this.callbacks = {
-    delivered() {},
-    await() {},
-    failed(err) {
+    delivered: function delivered() {},
+    await: function _await() {},
+    failed: function failed(err) {
       throw err;
     },
-    timeout() {}
+    timeout: function timeout() {}
   };
 
   this.cancelEvents = undefined;
@@ -43,33 +48,33 @@ const CommandRunner = function (options) {
   // This needs to be deferred to the next tick so that the user has a chance
   // to attach the various functions such as delivered, await, failed and timeout
   // to this instance.
-  process.nextTick(() => {
+  process.nextTick(function () {
     app.events.observe({
       where: {
         type: 'domain',
-        metadata: { correlationId: this.command.metadata.correlationId }
+        metadata: { correlationId: _this.command.metadata.correlationId }
       }
-    }).failed(err => {
-      this.clearEventsAndTimers();
-      this.fail(new errors.CommandFailed('Failed to deliver command.', err), command);
-    }).started(cancel => {
-      this.cancelEvents = cancel;
+    }).failed(function (err) {
+      _this.clearEventsAndTimers();
+      _this.fail(new errors.CommandFailed('Failed to deliver command.', err), command);
+    }).started(function (cancel) {
+      _this.cancelEvents = cancel;
 
-      wire.sendCommand(command).then(() => {
-        process.nextTick(() => {
-          this.callbacks.delivered(command);
+      wire.sendCommand(command).then(function () {
+        process.nextTick(function () {
+          _this.callbacks.delivered(command);
 
-          this.callbacks.timeout.id = setTimeout(() => {
-            this.clearEventsAndTimers();
-            this.callbacks.timeout(command);
-          }, this.callbacks.timeout.duration);
+          _this.callbacks.timeout.id = setTimeout(function () {
+            _this.clearEventsAndTimers();
+            _this.callbacks.timeout(command);
+          }, _this.callbacks.timeout.duration);
         });
-      }).catch(err => {
-        this.clearEventsAndTimers();
-        this.fail(new errors.CommandFailed('Failed to deliver command.', err), command);
+      }).catch(function (err) {
+        _this.clearEventsAndTimers();
+        _this.fail(new errors.CommandFailed('Failed to deliver command.', err), command);
       });
-    }).received(event => {
-      this.handleEvent(event);
+    }).received(function (event) {
+      _this.handleEvent(event);
     });
   });
 };
@@ -114,12 +119,14 @@ CommandRunner.prototype.delivered = function (callback) {
 };
 
 CommandRunner.prototype.await = function (eventNames, callback) {
+  var _this2 = this;
+
   if (this.callbacks.timeout.duration === 0) {
     this.callbacks.timeout.duration = defaultTimeoutDuration;
   }
 
-  flatten([eventNames]).forEach(eventName => {
-    this.callbacks.await[eventName] = callback;
+  flatten([eventNames]).forEach(function (eventName) {
+    _this2.callbacks.await[eventName] = callback;
   });
 
   return this;

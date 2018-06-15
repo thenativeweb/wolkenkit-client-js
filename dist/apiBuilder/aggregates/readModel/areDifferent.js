@@ -1,6 +1,6 @@
 'use strict';
 
-const areDifferent = function (left, right) {
+var areDifferent = function areDifferent(left, right) {
   if (!left) {
     throw new Error('Left is missing.');
   }
@@ -12,7 +12,7 @@ const areDifferent = function (left, right) {
     return true;
   }
 
-  for (let i = 0; i < left.length; i++) {
+  for (var i = 0; i < left.length; i++) {
     if (left[i].id !== right[i].id) {
       return true;
     }

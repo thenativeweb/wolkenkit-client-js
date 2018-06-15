@@ -1,10 +1,10 @@
 'use strict';
 
-const assign = require('lodash/assign');
+var assign = require('lodash/assign');
 
-const isEventIn = require('./isEventIn');
+var isEventIn = require('./isEventIn');
 
-const EventsAggregate = function (options) {
+var EventsAggregate = function EventsAggregate(options) {
   if (!options) {
     throw new Error('Options are missing.');
   }
@@ -20,7 +20,9 @@ const EventsAggregate = function (options) {
 };
 
 EventsAggregate.prototype.observe = function (options) {
-  const { wire, writeModel } = this;
+  var wire = this.wire,
+      writeModel = this.writeModel;
+
 
   options = options || {};
   options.where = assign({}, { type: 'domain' }, options.where);
@@ -29,46 +31,49 @@ EventsAggregate.prototype.observe = function (options) {
     throw new Error('Unknown event.');
   }
 
-  const callbacks = {
-    failed(err) {
+  var callbacks = {
+    failed: function failed(err) {
       throw err;
     },
-    started() {},
-    received() {}
+    started: function started() {},
+    received: function received() {}
   };
 
   // This needs to be deferred to the next tick so that the user has a chance
   // to attach the various functions such as started, received, and failed to
   // this instance.
-  process.nextTick(() => {
-    const events = wire.subscribeToEvents(options.where);
+  process.nextTick(function () {
+    var events = wire.subscribeToEvents(options.where);
 
-    let onData, onEnd, onError, onStart;
+    var onData = void 0,
+        onEnd = void 0,
+        onError = void 0,
+        onStart = void 0;
 
-    const cancel = function () {
+    var cancel = function cancel() {
       events.cancel();
     };
 
-    const unsubscribe = function () {
+    var unsubscribe = function unsubscribe() {
       events.stream.removeListener('start', onStart);
       events.stream.removeListener('data', onData);
       events.stream.removeListener('end', onEnd);
       events.stream.removeListener('error', onError);
     };
 
-    onStart = function () {
+    onStart = function onStart() {
       callbacks.started(cancel);
     };
 
-    onData = function (event) {
+    onData = function onData(event) {
       callbacks.received(event, cancel);
     };
 
-    onEnd = function () {
+    onEnd = function onEnd() {
       unsubscribe();
     };
 
-    onError = function (err) {
+    onError = function onError(err) {
       cancel();
       unsubscribe();
       callbacks.failed(err);
@@ -81,17 +86,17 @@ EventsAggregate.prototype.observe = function (options) {
   });
 
   return {
-    failed(callback) {
+    failed: function failed(callback) {
       callbacks.failed = callback;
 
       return this;
     },
-    started(callback) {
+    started: function started(callback) {
       callbacks.started = callback;
 
       return this;
     },
-    received(callback) {
+    received: function received(callback) {
       callbacks.received = callback;
 
       return this;

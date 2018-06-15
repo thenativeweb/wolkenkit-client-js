@@ -1,8 +1,8 @@
 'use strict';
 
-const ListAggregate = require('./ListAggregate');
+var ListAggregate = require('./ListAggregate');
 
-const create = function (options) {
+var create = function create(options) {
   if (!options) {
     throw new Error('Options are missing.');
   }
@@ -19,11 +19,15 @@ const create = function (options) {
     throw new Error('Model name is missing.');
   }
 
-  const { modelName, modelStore, modelType, wire } = options;
+  var modelName = options.modelName,
+      modelStore = options.modelStore,
+      modelType = options.modelType,
+      wire = options.wire;
+
 
   switch (modelType) {
     case 'lists':
-      return new ListAggregate.Readable({ wire, modelStore, modelName });
+      return new ListAggregate.Readable({ wire: wire, modelStore: modelStore, modelName: modelName });
     default:
       throw new Error('Invalid operation.');
   }

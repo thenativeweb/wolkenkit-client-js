@@ -1,17 +1,17 @@
 'use strict';
 
-const isNode = require('is-node'),
-      Promise = require('es6-promise').Promise;
+var isNode = require('is-node'),
+    Promise = require('es6-promise').Promise;
 
-const authenticationStrategies = require('./authentication'),
-      getApp = require('./getApp');
+var authenticationStrategies = require('./authentication'),
+    getApp = require('./getApp');
 
-let appCache = {};
+var appCache = {};
 
-const wolkenkitClient = {
+var wolkenkitClient = {
   authentication: authenticationStrategies,
 
-  connect(options) {
+  connect: function connect(options) {
     if (!options) {
       throw new Error('Options are missing.');
     }
@@ -19,24 +19,26 @@ const wolkenkitClient = {
       throw new Error('Host is missing.');
     }
 
-    const {
-      configuration,
-      host,
-      port = 443,
-      protocol = isNode ? 'https' : 'wss',
-      authentication = new this.authentication.None()
-    } = options;
+    var configuration = options.configuration,
+        host = options.host,
+        _options$port = options.port,
+        port = _options$port === undefined ? 443 : _options$port,
+        _options$protocol = options.protocol,
+        protocol = _options$protocol === undefined ? isNode ? 'https' : 'wss' : _options$protocol,
+        _options$authenticati = options.authentication,
+        authentication = _options$authenticati === undefined ? new this.authentication.None() : _options$authenticati;
 
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const appKey = `${host}:${port}`;
-        const app = appCache[appKey];
+
+    return new Promise(function (resolve, reject) {
+      setTimeout(function () {
+        var appKey = host + ':' + port;
+        var app = appCache[appKey];
 
         if (app) {
           return resolve(app);
         }
 
-        getApp({ host, port, protocol, authentication, configuration }).then(newApp => {
+        getApp({ host: host, port: port, protocol: protocol, authentication: authentication, configuration: configuration }).then(function (newApp) {
           appCache[appKey] = newApp;
           resolve(newApp);
         }).catch(reject);
@@ -44,12 +46,13 @@ const wolkenkitClient = {
     });
   },
 
+
   // Internal function, for tests only.
-  reset(options) {
+  reset: function reset(options) {
     options = options || {};
     options.keepLocalStorage = options.keepLocalStorage || false;
 
-    Object.keys(appCache).forEach(appName => {
+    Object.keys(appCache).forEach(function (appName) {
       appCache[appName].destroy(options);
     });
 

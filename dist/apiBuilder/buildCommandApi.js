@@ -1,11 +1,11 @@
 'use strict';
 
-const Command = require('commands-events').Command,
-      uuid = require('uuidv4');
+var Command = require('commands-events').Command,
+    uuid = require('uuidv4');
 
-const CommandRunner = require('./CommandRunner');
+var CommandRunner = require('./CommandRunner');
 
-const buildCommandApi = function (options) {
+var buildCommandApi = function buildCommandApi(options) {
   if (!options) {
     throw new Error('Options are missing.');
   }
@@ -25,12 +25,20 @@ const buildCommandApi = function (options) {
     throw new Error('Command name is missing.');
   }
 
-  const { app, wire, contextName, aggregateName, aggregateId = uuid(), commandName } = options;
+  var app = options.app,
+      wire = options.wire,
+      contextName = options.contextName,
+      aggregateName = options.aggregateName,
+      _options$aggregateId = options.aggregateId,
+      aggregateId = _options$aggregateId === undefined ? uuid() : _options$aggregateId,
+      commandName = options.commandName;
+
 
   return function (data, commandOptions) {
-    const { asUser } = commandOptions || {};
+    var _ref = commandOptions || {},
+        asUser = _ref.asUser;
 
-    const command = new Command({
+    var command = new Command({
       context: {
         name: contextName
       },
@@ -39,13 +47,13 @@ const buildCommandApi = function (options) {
         id: aggregateId
       },
       name: commandName,
-      data,
+      data: data,
       custom: {
-        asUser
+        asUser: asUser
       }
     });
 
-    return new CommandRunner({ app, wire, command });
+    return new CommandRunner({ app: app, wire: wire, command: command });
   };
 };
 

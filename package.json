@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "async": "2.6.1",
+    "babel-runtime": "6.26.0",
     "commands-events": "1.0.3",
     "defekt": "1.0.0",
     "es6-promise": "4.2.4",

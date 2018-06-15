@@ -1,13 +1,15 @@
 'use strict';
 
-const eachSeries = require('async/eachSeries'),
-      parallel = require('async/parallel');
+var eachSeries = require('async/eachSeries'),
+    parallel = require('async/parallel');
 
-const ModelStore = function () {
+var ModelStore = function ModelStore() {
   this.stores = {};
 };
 
 ModelStore.prototype.initialize = function (options, callback) {
+  var _this = this;
+
   if (!options) {
     throw new Error('Options are missing.');
   }
@@ -20,7 +22,11 @@ ModelStore.prototype.initialize = function (options, callback) {
 
   this.stores = options.stores;
 
-  parallel(Object.keys(this.stores).map(storeType => done => this.stores[storeType].initialize({}, done)), err => {
+  parallel(Object.keys(this.stores).map(function (storeType) {
+    return function (done) {
+      return _this.stores[storeType].initialize({}, done);
+    };
+  }), function (err) {
     if (err) {
       return callback(err);
     }
@@ -30,6 +36,8 @@ ModelStore.prototype.initialize = function (options, callback) {
 };
 
 ModelStore.prototype.processEvents = function (events, callback) {
+  var _this2 = this;
+
   if (!events) {
     throw new Error('Events are missing.');
   }
@@ -41,14 +49,14 @@ ModelStore.prototype.processEvents = function (events, callback) {
     return callback(null);
   }
 
-  const storeSpecificEvents = {};
+  var storeSpecificEvents = {};
 
-  Object.keys(this.stores).forEach(storeType => {
+  Object.keys(this.stores).forEach(function (storeType) {
     storeSpecificEvents[storeType] = [];
   });
 
-  events.forEach(event => {
-    const modelType = event.context.name;
+  events.forEach(function (event) {
+    var modelType = event.context.name;
 
     if (!storeSpecificEvents[modelType]) {
       return;
@@ -57,7 +65,11 @@ ModelStore.prototype.processEvents = function (events, callback) {
     storeSpecificEvents[modelType].push(event);
   });
 
-  parallel(Object.keys(this.stores).map(storeType => done => this.processEventsInStore(this.stores[storeType], storeSpecificEvents[storeType], done)), callback);
+  parallel(Object.keys(this.stores).map(function (storeType) {
+    return function (done) {
+      return _this2.processEventsInStore(_this2.stores[storeType], storeSpecificEvents[storeType], done);
+    };
+  }), callback);
 };
 
 ModelStore.prototype.processEventsInStore = function (store, events, callback) {
@@ -75,7 +87,7 @@ ModelStore.prototype.processEventsInStore = function (store, events, callback) {
     return callback(null);
   }
 
-  eachSeries(events, (event, done) => {
+  eachSeries(events, function (event, done) {
     store[event.name]({
       modelName: event.aggregate.name,
       selector: event.data.selector,
@@ -130,20 +142,20 @@ ModelStore.prototype.readOne = function (options, callback) {
       where: options.query.where,
       take: 1
     }
-  }, (err, model) => {
+  }, function (err, model) {
     if (err) {
       return callback(err);
     }
 
-    const items = [];
-    const onData = function (item) {
+    var items = [];
+    var onData = function onData(item) {
       items.push(item);
     };
-    const onEnd = function () {
+    var onEnd = function onEnd() {
       model.stream.removeListener('data', onData);
       model.stream.removeListener('end', onEnd);
 
-      const firstItem = items[0];
+      var firstItem = items[0];
 
       if (!firstItem) {
         return callback(new Error('Item not found.'));

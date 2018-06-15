@@ -1,5 +1,5 @@
 'use strict';
 
-const ListStore = require('./ListStore');
+var ListStore = require('./ListStore');
 
-module.exports = { ListStore };
+module.exports = { ListStore: ListStore };

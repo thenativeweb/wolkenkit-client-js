@@ -1,8 +1,8 @@
 'use strict';
 
-const EventsAggregate = require('./aggregates/events/EventsAggregate');
+var EventsAggregate = require('./aggregates/events/EventsAggregate');
 
-const getEventsApi = function (options) {
+var getEventsApi = function getEventsApi(options) {
   if (!options) {
     throw new Error('Options are missing.');
   }
@@ -13,10 +13,12 @@ const getEventsApi = function (options) {
     throw new Error('Write model is missing.');
   }
 
-  const { wire, writeModel } = options;
+  var wire = options.wire,
+      writeModel = options.writeModel;
 
-  const api = {
-    events: new EventsAggregate({ wire, writeModel })
+
+  var api = {
+    events: new EventsAggregate({ wire: wire, writeModel: writeModel })
   };
 
   return api;

@@ -1,11 +1,11 @@
 'use strict';
 
-const None = require('./None'),
-      OpenIdConnect = require('./OpenIdConnect');
+var None = require('./None'),
+    OpenIdConnect = require('./OpenIdConnect');
 
-const authentication = {
-  None,
-  OpenIdConnect
+var authentication = {
+  None: None,
+  OpenIdConnect: OpenIdConnect
 };
 
 module.exports = authentication;

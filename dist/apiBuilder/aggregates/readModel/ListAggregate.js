@@ -1,10 +1,12 @@
 'use strict';
 
-const areDifferent = require('./areDifferent'),
-      IsDirty = require('./IsDirty'),
-      readSnapshot = require('./readSnapshot');
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-const Readable = function (options) {
+var areDifferent = require('./areDifferent'),
+    IsDirty = require('./IsDirty'),
+    readSnapshot = require('./readSnapshot');
+
+var Readable = function Readable(options) {
   if (!options) {
     throw new Error('Options are missing.');
   }
@@ -25,19 +27,22 @@ const Readable = function (options) {
 };
 
 Readable.prototype.read = function (query) {
-  const { modelName, modelStore, modelType } = this;
+  var modelName = this.modelName,
+      modelStore = this.modelStore,
+      modelType = this.modelType;
+
 
   query = query || {};
 
-  const callbacks = {
-    failed(err) {
+  var callbacks = {
+    failed: function failed(err) {
       throw err;
     },
-    finished() {}
+    finished: function finished() {}
   };
 
-  process.nextTick(() => {
-    readSnapshot({ modelStore, modelType, modelName, query }, (err, result) => {
+  process.nextTick(function () {
+    readSnapshot({ modelStore: modelStore, modelType: modelType, modelName: modelName, query: query }, function (err, result) {
       if (err) {
         return callbacks.failed(err);
       }
@@ -46,12 +51,12 @@ Readable.prototype.read = function (query) {
   });
 
   return {
-    failed(callback) {
+    failed: function failed(callback) {
       callbacks.failed = callback;
 
       return this;
     },
-    finished(callback) {
+    finished: function finished(callback) {
       callbacks.finished = callback;
 
       return this;
@@ -67,17 +72,20 @@ Readable.prototype.readOne = function (query) {
     throw new Error('Where is missing.');
   }
 
-  const { modelName, modelStore, modelType } = this;
+  var modelName = this.modelName,
+      modelStore = this.modelStore,
+      modelType = this.modelType;
 
-  const callbacks = {
-    failed(err) {
+
+  var callbacks = {
+    failed: function failed(err) {
       throw err;
     },
-    finished() {}
+    finished: function finished() {}
   };
 
-  process.nextTick(() => {
-    modelStore.readOne({ modelType, modelName, query }, (err, item) => {
+  process.nextTick(function () {
+    modelStore.readOne({ modelType: modelType, modelName: modelName, query: query }, function (err, item) {
       if (err) {
         return callbacks.failed(err);
       }
@@ -86,12 +94,12 @@ Readable.prototype.readOne = function (query) {
   });
 
   return {
-    failed(callback) {
+    failed: function failed(callback) {
       callbacks.failed = callback;
 
       return this;
     },
-    finished(callback) {
+    finished: function finished(callback) {
       callbacks.finished = callback;
 
       return this;
@@ -100,48 +108,56 @@ Readable.prototype.readOne = function (query) {
 };
 
 Readable.prototype.readAndObserve = function (query) {
-  const { modelName, modelStore, modelType, wire } = this;
+  var modelName = this.modelName,
+      modelStore = this.modelStore,
+      modelType = this.modelType,
+      wire = this.wire;
+
 
   query = query || {};
 
-  const callbacks = {
-    failed(err) {
+  var callbacks = {
+    failed: function failed(err) {
       throw err;
     },
-    started() {},
-    updated() {}
+    started: function started() {},
+    updated: function updated() {}
   };
 
   // This needs to be deferred to the next tick so that the user has a chance
   // to attach the various functions such as started, received, and failed to
   // this instance.
-  process.nextTick(() => {
-    const events = wire.subscribeToEvents({
+  process.nextTick(function () {
+    var events = wire.subscribeToEvents({
       context: { name: modelType },
       aggregate: { name: modelName },
       type: 'readModel'
     });
 
-    const observeStream = events.stream;
+    var observeStream = events.stream;
 
-    const isDirty = new IsDirty(),
-          result = [];
+    var isDirty = new IsDirty(),
+        result = [];
 
     isDirty.set(false);
 
-    let cancel, onObserveStreamData, onObserveStreamEnd, onObserveStreamError, onObserveStreamStart;
+    var cancel = void 0,
+        onObserveStreamData = void 0,
+        onObserveStreamEnd = void 0,
+        onObserveStreamError = void 0,
+        onObserveStreamStart = void 0;
 
-    const unsubscribeObserveStream = function () {
+    var unsubscribeObserveStream = function unsubscribeObserveStream() {
       observeStream.removeListener('start', onObserveStreamStart);
       observeStream.removeListener('data', onObserveStreamData);
       observeStream.removeListener('end', onObserveStreamEnd);
       observeStream.removeListener('error', onObserveStreamError);
     };
 
-    const readAndWaitForUpdates = function () {
+    var readAndWaitForUpdates = function readAndWaitForUpdates() {
       isDirty.set(false);
 
-      readSnapshot({ modelStore, modelType, modelName, query }, (err, snapshot) => {
+      readSnapshot({ modelStore: modelStore, modelType: modelType, modelName: modelName, query: query }, function (err, snapshot) {
         if (err) {
           cancel();
 
@@ -150,13 +166,15 @@ Readable.prototype.readAndObserve = function (query) {
 
         if (areDifferent(result, snapshot)) {
           result.length = 0;
-          result.push(...snapshot);
+          result.push.apply(result, _toConsumableArray(snapshot));
 
           callbacks.updated(result, cancel);
         }
 
-        const onIsDirty = function () {
-          process.nextTick(() => readAndWaitForUpdates());
+        var onIsDirty = function onIsDirty() {
+          process.nextTick(function () {
+            return readAndWaitForUpdates();
+          });
         };
 
         if (isDirty.get()) {
@@ -167,25 +185,25 @@ Readable.prototype.readAndObserve = function (query) {
       });
     };
 
-    cancel = function () {
+    cancel = function cancel() {
       isDirty.removeAllListeners();
       events.cancel();
     };
 
-    onObserveStreamStart = function () {
+    onObserveStreamStart = function onObserveStreamStart() {
       callbacks.started(result, cancel);
       readAndWaitForUpdates();
     };
 
-    onObserveStreamData = function () {
+    onObserveStreamData = function onObserveStreamData() {
       isDirty.set(true);
     };
 
-    onObserveStreamEnd = function () {
+    onObserveStreamEnd = function onObserveStreamEnd() {
       unsubscribeObserveStream();
     };
 
-    onObserveStreamError = function (err) {
+    onObserveStreamError = function onObserveStreamError(err) {
       unsubscribeObserveStream();
       callbacks.failed(err);
     };
@@ -197,17 +215,17 @@ Readable.prototype.readAndObserve = function (query) {
   });
 
   return {
-    failed(callback) {
+    failed: function failed(callback) {
       callbacks.failed = callback;
 
       return this;
     },
-    started(callback) {
+    started: function started(callback) {
       callbacks.started = callback;
 
       return this;
     },
-    updated(callback) {
+    updated: function updated(callback) {
       callbacks.updated = callback;
 
       return this;
@@ -215,4 +233,4 @@ Readable.prototype.readAndObserve = function (query) {
   };
 };
 
-module.exports = { Readable };
+module.exports = { Readable: Readable };

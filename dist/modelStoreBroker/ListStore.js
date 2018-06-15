@@ -1,6 +1,6 @@
 'use strict';
 
-const ListStore = function (options) {
+var ListStore = function ListStore(options) {
   if (!options) {
     throw new Error('Options are missing.');
   }
@@ -19,7 +19,7 @@ ListStore.prototype.initialize = function (options, callback) {
     throw new Error('Callback is missing.');
   }
 
-  process.nextTick(() => {
+  process.nextTick(function () {
     callback(null);
   });
 };
@@ -38,12 +38,14 @@ ListStore.prototype.read = function (options, callback) {
     throw new Error('Callback is missing.');
   }
 
-  const { wire } = this;
-  const { modelName, query } = options;
+  var wire = this.wire;
+  var modelName = options.modelName,
+      query = options.query;
 
-  const model = wire.readModel({ modelType: 'lists', modelName, query });
 
-  process.nextTick(() => {
+  var model = wire.readModel({ modelType: 'lists', modelName: modelName, query: query });
+
+  process.nextTick(function () {
     callback(null, model);
   });
 };

@@ -1,9 +1,9 @@
 'use strict';
 
-const Https = require('./Https'),
-      Wss = require('./Wss');
+var Https = require('./Https'),
+    Wss = require('./Wss');
 
-const wires = {
+var wires = {
   https: Https,
   wss: Wss
 };

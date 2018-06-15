@@ -1,31 +1,28 @@
 'use strict';
 
-const polyfill = {
+var polyfill = {
   data: {},
 
-  setItem(key, value) {
+  setItem: function setItem(key, value) {
     this.data[key] = String(value);
   },
-
-  getItem(key) {
+  getItem: function getItem(key) {
     if (!this.data.hasOwnProperty(key)) {
       return undefined;
     }
 
     return this.data[key];
   },
-
-  removeItem(key) {
+  removeItem: function removeItem(key) {
     Reflect.deleteProperty(this.data, key);
   },
-
-  clear() {
+  clear: function clear() {
     this.data = {};
   }
 };
 
 /* eslint-disable no-undef */
-const localStorage = typeof window !== 'undefined' && window.localStorage ? window.localStorage : polyfill;
+var localStorage = typeof window !== 'undefined' && window.localStorage ? window.localStorage : polyfill;
 /* eslint-enable no-undef */
 
 module.exports = localStorage;

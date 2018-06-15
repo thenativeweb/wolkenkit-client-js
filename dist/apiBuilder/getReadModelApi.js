@@ -1,8 +1,8 @@
 'use strict';
 
-const createReadModelAggregate = require('./aggregates/readModel/create');
+var createReadModelAggregate = require('./aggregates/readModel/create');
 
-const getReadModelApi = function (options) {
+var getReadModelApi = function getReadModelApi(options) {
   if (!options) {
     throw new Error('Options are missing.');
   }
@@ -16,19 +16,22 @@ const getReadModelApi = function (options) {
     throw new Error('Model store is missing.');
   }
 
-  const { readModel, modelStore, wire } = options;
+  var readModel = options.readModel,
+      modelStore = options.modelStore,
+      wire = options.wire;
 
-  const api = {};
 
-  Object.keys(readModel).forEach(modelType => {
+  var api = {};
+
+  Object.keys(readModel).forEach(function (modelType) {
     api[modelType] = {};
 
-    Object.keys(readModel[modelType]).forEach(modelName => {
+    Object.keys(readModel[modelType]).forEach(function (modelName) {
       api[modelType][modelName] = createReadModelAggregate({
-        modelStore,
-        modelType,
-        modelName,
-        wire
+        modelStore: modelStore,
+        modelType: modelType,
+        modelName: modelName,
+        wire: wire
       });
     });
   });

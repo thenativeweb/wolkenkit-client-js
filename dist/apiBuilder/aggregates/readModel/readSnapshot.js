@@ -1,8 +1,8 @@
 'use strict';
 
-const toArray = require('streamtoarray');
+var toArray = require('streamtoarray');
 
-const readSnapshot = function (options, callback) {
+var readSnapshot = function readSnapshot(options, callback) {
   if (!options) {
     throw new Error('Options are missing.');
   }
@@ -19,13 +19,17 @@ const readSnapshot = function (options, callback) {
     throw new Error('Query is missing.');
   }
 
-  const { modelName, modelStore, modelType, query } = options;
+  var modelName = options.modelName,
+      modelStore = options.modelStore,
+      modelType = options.modelType,
+      query = options.query;
 
-  modelStore.read({ modelType, modelName, query }, (errRead, model) => {
+
+  modelStore.read({ modelType: modelType, modelName: modelName, query: query }, function (errRead, model) {
     if (errRead) {
       return callback(errRead);
     }
-    toArray(model.stream, (errToArray, array) => {
+    toArray(model.stream, function (errToArray, array) {
       if (errToArray) {
         return callback(errToArray);
       }

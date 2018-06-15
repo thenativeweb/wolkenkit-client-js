@@ -1,9 +1,22 @@
 'use strict';
 
-const Limes = require('limes');
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-class Local {
-  constructor({ identityProviderName, certificate, privateKey, onAuthenticating, onAuthenticated, onError }) {
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Limes = require('limes');
+
+var Local = function () {
+  function Local(_ref) {
+    var identityProviderName = _ref.identityProviderName,
+        certificate = _ref.certificate,
+        privateKey = _ref.privateKey,
+        onAuthenticating = _ref.onAuthenticating,
+        onAuthenticated = _ref.onAuthenticated,
+        onError = _ref.onError;
+
+    _classCallCheck(this, Local);
+
     if (!identityProviderName) {
       throw new Error('Identity provider name is missing.');
     }
@@ -14,7 +27,7 @@ class Local {
       throw new Error('Private key is missing.');
     }
 
-    this.identityProvider = new Limes({ identityProviderName, certificate, privateKey });
+    this.identityProvider = new Limes({ identityProviderName: identityProviderName, certificate: certificate, privateKey: privateKey });
 
     this.onAuthenticating = onAuthenticating || this.onAuthenticating;
     this.onAuthenticated = onAuthenticated || this.onAuthenticated;
@@ -23,83 +36,101 @@ class Local {
     this.token = undefined;
   }
 
-  static decodeBodyFromToken(token) {
-    try {
-      const bodyBase64Url = token.split('.')[1];
+  _createClass(Local, [{
+    key: 'login',
+    value: function login(userName) {
+      var claims = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-      const bodyBase64 = bodyBase64Url.replace(/-/g, '+').replace(/_/g, '/'),
+      if (!userName) {
+        throw new Error('User name is missing.');
+      }
+
+      var token = this.identityProvider.issueTokenFor(userName, claims);
+
+      this.token = token;
+    }
+  }, {
+    key: 'logout',
+    value: function logout() {
+      this.token = undefined;
+    }
+
+    /* eslint-disable class-methods-use-this */
+
+  }, {
+    key: 'onAuthenticating',
+    value: function onAuthenticating(proceed) {
+      proceed();
+    }
+  }, {
+    key: 'onAuthenticated',
+    value: function onAuthenticated() {}
+  }, {
+    key: 'onError',
+    value: function onError(err) {
+      throw err;
+    }
+    /* eslint-enable class-methods-use-this */
+
+  }, {
+    key: 'isLoggedIn',
+    value: function isLoggedIn() {
+      var profile = this.getProfile();
+
+      if (!profile) {
+        return false;
+      }
+
+      if (!profile.exp) {
+        return false;
+      }
+
+      var expiresAt = profile.exp * 1000;
+      var now = Date.now();
+
+      if (expiresAt < now) {
+        return false;
+      }
+
+      return true;
+    }
+  }, {
+    key: 'getToken',
+    value: function getToken() {
+      if (!this.token) {
+        return undefined;
+      }
+
+      return this.token;
+    }
+  }, {
+    key: 'getProfile',
+    value: function getProfile() {
+      var token = this.getToken();
+
+      if (!token) {
+        return;
+      }
+
+      return Local.decodeBodyFromToken(token);
+    }
+  }], [{
+    key: 'decodeBodyFromToken',
+    value: function decodeBodyFromToken(token) {
+      try {
+        var bodyBase64Url = token.split('.')[1];
+
+        var bodyBase64 = bodyBase64Url.replace(/-/g, '+').replace(/_/g, '/'),
             bodyDecoded = Buffer.from(bodyBase64, 'base64').toString('utf8');
 
-      return JSON.parse(bodyDecoded);
-    } catch (ex) {
-      return undefined;
+        return JSON.parse(bodyDecoded);
+      } catch (ex) {
+        return undefined;
+      }
     }
-  }
+  }]);
 
-  login(userName, claims = {}) {
-    if (!userName) {
-      throw new Error('User name is missing.');
-    }
-
-    const token = this.identityProvider.issueTokenFor(userName, claims);
-
-    this.token = token;
-  }
-
-  logout() {
-    this.token = undefined;
-  }
-
-  /* eslint-disable class-methods-use-this */
-  onAuthenticating(proceed) {
-    proceed();
-  }
-
-  onAuthenticated() {}
-
-  onError(err) {
-    throw err;
-  }
-  /* eslint-enable class-methods-use-this */
-
-  isLoggedIn() {
-    const profile = this.getProfile();
-
-    if (!profile) {
-      return false;
-    }
-
-    if (!profile.exp) {
-      return false;
-    }
-
-    const expiresAt = profile.exp * 1000;
-    const now = Date.now();
-
-    if (expiresAt < now) {
-      return false;
-    }
-
-    return true;
-  }
-
-  getToken() {
-    if (!this.token) {
-      return undefined;
-    }
-
-    return this.token;
-  }
-
-  getProfile() {
-    const token = this.getToken();
-
-    if (!token) {
-      return;
-    }
-
-    return Local.decodeBodyFromToken(token);
-  }
-}
+  return Local;
+}();
 
 module.exports = Local;

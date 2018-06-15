@@ -1,8 +1,8 @@
 'use strict';
 
-const buildCommandApi = require('./buildCommandApi');
+var buildCommandApi = require('./buildCommandApi');
 
-const getWriteModelApi = function (options) {
+var getWriteModelApi = function getWriteModelApi(options) {
   if (!options) {
     throw new Error('Options are missing.');
   }
@@ -16,19 +16,22 @@ const getWriteModelApi = function (options) {
     throw new Error('Write model is missing.');
   }
 
-  const { app, wire, writeModel } = options;
+  var app = options.app,
+      wire = options.wire,
+      writeModel = options.writeModel;
 
-  const api = {};
 
-  Object.keys(writeModel).forEach(contextName => {
+  var api = {};
+
+  Object.keys(writeModel).forEach(function (contextName) {
     api[contextName] = {};
 
-    Object.keys(writeModel[contextName]).forEach(aggregateName => {
+    Object.keys(writeModel[contextName]).forEach(function (aggregateName) {
       api[contextName][aggregateName] = function (aggregateId) {
-        const commands = {};
+        var commands = {};
 
-        Object.keys(writeModel[contextName][aggregateName].commands).forEach(commandName => {
-          commands[commandName] = buildCommandApi({ api, app, wire, contextName, aggregateName, aggregateId, commandName });
+        Object.keys(writeModel[contextName][aggregateName].commands).forEach(function (commandName) {
+          commands[commandName] = buildCommandApi({ api: api, app: app, wire: wire, contextName: contextName, aggregateName: aggregateName, aggregateId: aggregateId, commandName: commandName });
         });
 
         return commands;
