@@ -6,7 +6,7 @@ wolkenkit-client is a client to access wolkenkit applications.
 
 ## Documentation
 
-See [https://docs.wolkenkit.io/latest/reference/building-a-client/connecting-to-an-application](Buildling a client) on how to use this module to build a client that connects to a [wolkenkit](https://www.wolkenkit.io) application.
+See [Buildling a client](https://docs.wolkenkit.io/latest/reference/building-a-client/connecting-to-an-application) on how to use this module to build a client that connects to a [wolkenkit](https://www.wolkenkit.io) application.
 
 ## Running the build
 
@@ -20,7 +20,7 @@ $ npx roboter
 
 To run the tests on [BrowserStack](https://www.browserstack.com/), you need to define the environment variable `SELENIUM_ENV` and set it to the value `browserstack`.
 
-*Please note that you need to have the environment variables `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY` set to your account's credentials.*
+_Please note that you need to have the environment variables `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY` set to your account's credentials._
 
 Running the tests on BrowserStack enables you to test on multiple browsers and platforms. BrowserStack kindly offers this service for free to open-source projects.
 
