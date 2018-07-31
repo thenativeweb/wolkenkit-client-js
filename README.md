@@ -6,7 +6,7 @@ wolkenkit-client is a client to access wolkenkit applications.
 
 ## Documentation
 
-See [Buildling a client](https://docs.wolkenkit.io/latest/reference/building-a-client/connecting-to-an-application) on how to use this module to build a client that connects to a [wolkenkit](https://www.wolkenkit.io) application.
+See [Building a client](https://docs.wolkenkit.io/latest/reference/building-a-client/connecting-to-an-application) on how to use this module to build a client that connects to a [wolkenkit](https://www.wolkenkit.io) application.
 
 ## Running the build
 
