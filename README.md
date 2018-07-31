@@ -20,7 +20,7 @@ $ npx roboter
 
 To run the tests on [BrowserStack](https://www.browserstack.com/), you need to define the environment variable `SELENIUM_ENV` and set it to the value `browserstack`.
 
-_Please note that you need to have the environment variables `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY` set to your account's credentials._
+*Please note that you need to have the environment variables `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY` set to your account's credentials.*
 
 Running the tests on BrowserStack enables you to test on multiple browsers and platforms. BrowserStack kindly offers this service for free to open-source projects.
 
