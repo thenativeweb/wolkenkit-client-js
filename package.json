@@ -39,7 +39,7 @@
     "limes": "1.0.1",
     "lodash": "^4.17.11",
     "parse-duration": "0.1.1",
-    "streamtoarray": "^1.0.0",
+    "streamtoarray": "1.0.0",
     "uuidv4": "2.0.0",
     "ws": "6.1.0"
   },
