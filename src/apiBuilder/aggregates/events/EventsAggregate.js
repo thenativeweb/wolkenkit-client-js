@@ -40,8 +40,8 @@ EventsAggregate.prototype.observe = function (options) {
   // This needs to be deferred to the next tick so that the user has a chance
   // to attach the various functions such as started, received, and failed to
   // this instance.
-  process.nextTick(() => {
-    const events = wire.subscribeToEvents(options.where);
+  process.nextTick(async () => {
+    const events = await wire.subscribeToEvents(options.where);
 
     let onData,
         onEnd,

@@ -65,10 +65,10 @@ class Wss extends EventEmitter {
       throw new Error('Command is missing.');
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       const { app, socket } = this;
 
-      const token = app.auth.getToken();
+      const token = await app.auth.getToken();
 
       const message = {
         type: 'sendCommand',
@@ -106,13 +106,13 @@ class Wss extends EventEmitter {
     });
   }
 
-  subscribeToEvents (filter) {
+  async subscribeToEvents (filter) {
     filter = filter || {};
 
     const { app, socket } = this;
     let hasBeenCanceledByUser = false;
 
-    const token = app.auth.getToken();
+    const token = await app.auth.getToken();
 
     const message = {
       type: 'subscribeEvents',
@@ -205,7 +205,7 @@ class Wss extends EventEmitter {
     return { stream: subscriptionStream, cancel: cancelSubscription };
   }
 
-  readModel (options) {
+  async readModel (options) {
     if (!options) {
       throw new Error('Options are missing.');
     }
@@ -237,7 +237,7 @@ class Wss extends EventEmitter {
       query.take = options.query.take;
     }
 
-    const token = app.auth.getToken();
+    const token = await app.auth.getToken();
 
     const message = {
       type: 'subscribeRead',

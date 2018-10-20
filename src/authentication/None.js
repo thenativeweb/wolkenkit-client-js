@@ -1,7 +1,7 @@
 'use strict';
 
 class None {
-  login () {
+  async login () {
     this.onError(new Error('Invalid operation.'));
   }
 
@@ -22,15 +22,15 @@ class None {
     throw err;
   }
 
-  isLoggedIn () {
+  async isLoggedIn () {
     return false;
   }
 
-  getToken () {
+  async getToken () {
     return undefined;
   }
 
-  getProfile () {
+  async getProfile () {
     return undefined;
   }
   /* eslint-enable class-methods-use-this */

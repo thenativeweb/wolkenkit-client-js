@@ -102,7 +102,7 @@ class OpenIdConnect {
     this.onAuthenticated(this.getProfile());
   }
 
-  login () {
+  async login () {
     this.onAuthenticating(() => {
       const clientId = window.encodeURIComponent(this.clientId),
             identityProviderUrl = this.identityProviderUrl,
@@ -122,7 +122,7 @@ class OpenIdConnect {
     window.localStorage.removeItem(this.getKey());
   }
 
-  isLoggedIn () {
+  async isLoggedIn () {
     const profile = this.getProfile();
 
     if (!profile) {
@@ -143,7 +143,7 @@ class OpenIdConnect {
     return true;
   }
 
-  getToken () {
+  async getToken () {
     const token = window.localStorage.getItem(this.getKey());
 
     if (!token) {
@@ -153,7 +153,7 @@ class OpenIdConnect {
     return token;
   }
 
-  getProfile () {
+  async getProfile () {
     const token = this.getToken();
 
     if (!token) {

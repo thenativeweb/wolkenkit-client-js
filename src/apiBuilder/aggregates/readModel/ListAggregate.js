@@ -115,8 +115,8 @@ Readable.prototype.readAndObserve = function (query) {
   // This needs to be deferred to the next tick so that the user has a chance
   // to attach the various functions such as started, received, and failed to
   // this instance.
-  process.nextTick(() => {
-    const events = wire.subscribeToEvents({
+  process.nextTick(async () => {
+    const events = await wire.subscribeToEvents({
       context: { name: modelType },
       aggregate: { name: modelName },
       type: 'readModel'

@@ -40,14 +40,14 @@ class Https extends EventEmitter {
       throw new Error('Command is missing.');
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       const { app, host, port } = this;
 
       const headers = {
         'content-type': 'application/json'
       };
 
-      const token = app.auth.getToken();
+      const token = await app.auth.getToken();
 
       if (token) {
         headers.authorization = `Bearer ${token}`;
@@ -77,13 +77,13 @@ class Https extends EventEmitter {
     });
   }
 
-  subscribeToEvents (filter) {
+  async subscribeToEvents (filter) {
     filter = filter || {};
 
     const { app, host, port } = this;
 
     const headers = {},
-          token = app.auth.getToken();
+          token = await app.auth.getToken();
 
     if (token) {
       headers.authorization = `Bearer ${token}`;
@@ -171,7 +171,7 @@ class Https extends EventEmitter {
     return { stream: subscriptionStream, cancel: cancelSubscription };
   }
 
-  readModel (options) {
+  async readModel (options) {
     if (!options) {
       throw new Error('Options are missing.');
     }
@@ -203,7 +203,7 @@ class Https extends EventEmitter {
     }
 
     const headers = {},
-          token = app.auth.getToken();
+          token = await app.auth.getToken();
 
     if (token) {
       headers.authorization = `Bearer ${token}`;

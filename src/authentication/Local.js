@@ -36,7 +36,7 @@ class Local {
     }
   }
 
-  login (userName, claims = {}) {
+  async login (userName, claims = {}) {
     if (!userName) {
       throw new Error('User name is missing.');
     }
@@ -62,7 +62,7 @@ class Local {
   }
   /* eslint-enable class-methods-use-this */
 
-  isLoggedIn () {
+  async isLoggedIn () {
     const profile = this.getProfile();
 
     if (!profile) {
@@ -83,7 +83,7 @@ class Local {
     return true;
   }
 
-  getToken () {
+  async getToken () {
     if (!this.token) {
       return undefined;
     }
@@ -91,7 +91,7 @@ class Local {
     return this.token;
   }
 
-  getProfile () {
+  async getProfile () {
     const token = this.getToken();
 
     if (!token) {
