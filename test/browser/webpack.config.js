@@ -23,7 +23,7 @@ const configurationAuthentication = {
     rules: [
       {
         test: /\.js$/,
-        use: [{ loader: 'babel-loader', options: { babelrc: false, presets: [ 'env' ]}}]
+        use: [{ loader: 'babel-loader', options: { babelrc: false, presets: [ '@babel/env' ]}}]
       }
     ]
   },
@@ -31,7 +31,10 @@ const configurationAuthentication = {
 };
 
 const configurationIntegration = {
-  entry: path.join(__dirname, '..', 'integration', 'wolkenkitClientWssTests.js'),
+  entry: [
+    '@babel/polyfill',
+    path.join(__dirname, '..', 'integration', 'wolkenkitClientWssTests.js')
+  ],
   mode: 'development',
   output: {
     path: path.resolve(__dirname, 'build', 'integration'),
@@ -50,7 +53,7 @@ const configurationIntegration = {
             loader: 'babel-loader',
             options: {
               babelrc: false,
-              presets: [ 'env' ]
+              presets: [ '@babel/env' ]
             }
           }
         ]

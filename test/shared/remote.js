@@ -7,9 +7,9 @@ const bodyParser = require('body-parser'),
       express = require('express'),
       shell = require('shelljs');
 
-const env = require('../shared/env'),
-      issueToken = require('../shared/issueToken'),
-      resetMongoDb = require('../shared/resetMongoDb'),
+const env = require('./env'),
+      issueToken = require('./issueToken'),
+      resetMongoDb = require('./resetMongoDb'),
       waitFor = require('./waitFor');
 
 const app = express();

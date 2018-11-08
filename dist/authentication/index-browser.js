@@ -7,5 +7,4 @@ var authentication = {
   None: None,
   OpenIdConnect: OpenIdConnect
 };
-
 module.exports = authentication;

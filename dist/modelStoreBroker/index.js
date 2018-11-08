@@ -2,4 +2,6 @@
 
 var ListStore = require('./ListStore');
 
-module.exports = { ListStore: ListStore };
+module.exports = {
+  ListStore: ListStore
+};

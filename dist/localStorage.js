@@ -2,7 +2,6 @@
 
 var polyfill = {
   data: {},
-
   setItem: function setItem(key, value) {
     this.data[key] = String(value);
   },
@@ -20,8 +19,8 @@ var polyfill = {
     this.data = {};
   }
 };
-
 /* eslint-disable no-undef */
+
 var localStorage = typeof window !== 'undefined' && window.localStorage ? window.localStorage : polyfill;
 /* eslint-enable no-undef */
 

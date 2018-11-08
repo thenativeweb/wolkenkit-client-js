@@ -4,6 +4,7 @@ var areDifferent = function areDifferent(left, right) {
   if (!left) {
     throw new Error('Left is missing.');
   }
+
   if (!right) {
     throw new Error('Right is missing.');
   }

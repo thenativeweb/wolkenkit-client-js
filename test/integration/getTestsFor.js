@@ -197,6 +197,41 @@ const getTestsFor = function (testOptions) {
           });
       });
 
+      test('does not receive rejected events from other users.', done => {
+        const oldGetToken = plcr.auth.getToken;
+
+        issueToken({ subject: uuid() }, (errToken, token) => {
+          if (errToken) {
+            return done(errToken);
+          }
+
+          // Observe events as public user ...
+          plcr.events.observe().
+            failed(done).
+            received(() => {
+              done(new Error('Invalid operation.'));
+            }).
+            started(cancel => {
+              // ... but send commands as authenticated user.
+              plcr.auth.getToken = function () {
+                return token;
+              };
+
+              // If no event was received for one second, cancel.
+              setTimeout(() => {
+                cancel();
+                plcr.auth.getToken = oldGetToken;
+                done();
+              }, 1 * 1000);
+
+              plcr.planning.peerGroup().joinAndReject().
+                failed(() => {
+                  // Intentionally left blank.
+                });
+            });
+        });
+      });
+
       test('sends a command and receives an error event if the command handler failed.', done => {
         plcr.events.observe().
           failed(done).
@@ -230,6 +265,41 @@ const getTestsFor = function (testOptions) {
 
             done();
           });
+      });
+
+      test('does not receive failed events from other users.', done => {
+        const oldGetToken = plcr.auth.getToken;
+
+        issueToken({ subject: uuid() }, (errToken, token) => {
+          if (errToken) {
+            return done(errToken);
+          }
+
+          // Observe events as public user ...
+          plcr.events.observe().
+            failed(done).
+            received(() => {
+              done(new Error('Invalid operation.'));
+            }).
+            started(cancel => {
+              // ... but send commands as authenticated user.
+              plcr.auth.getToken = function () {
+                return token;
+              };
+
+              // If no event was received for one second, cancel.
+              setTimeout(() => {
+                cancel();
+                plcr.auth.getToken = oldGetToken;
+                done();
+              }, 1 * 1000);
+
+              plcr.planning.peerGroup().joinAndFail().
+                failed(() => {
+                  // Intentionally left blank.
+                });
+            });
+        });
       });
 
       test('sends a command and awaits an event.', done => {

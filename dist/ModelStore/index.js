@@ -13,15 +13,16 @@ ModelStore.prototype.initialize = function (options, callback) {
   if (!options) {
     throw new Error('Options are missing.');
   }
+
   if (!options.stores) {
     throw new Error('Stores are missing.');
   }
+
   if (!callback) {
     throw new Error('Callback is missing.');
   }
 
   this.stores = options.stores;
-
   parallel(Object.keys(this.stores).map(function (storeType) {
     return function (done) {
       return _this.stores[storeType].initialize({}, done);
@@ -41,6 +42,7 @@ ModelStore.prototype.processEvents = function (events, callback) {
   if (!events) {
     throw new Error('Events are missing.');
   }
+
   if (!callback) {
     throw new Error('Callback is missing.');
   }
@@ -50,11 +52,9 @@ ModelStore.prototype.processEvents = function (events, callback) {
   }
 
   var storeSpecificEvents = {};
-
   Object.keys(this.stores).forEach(function (storeType) {
     storeSpecificEvents[storeType] = [];
   });
-
   events.forEach(function (event) {
     var modelType = event.context.name;
 
@@ -64,7 +64,6 @@ ModelStore.prototype.processEvents = function (events, callback) {
 
     storeSpecificEvents[modelType].push(event);
   });
-
   parallel(Object.keys(this.stores).map(function (storeType) {
     return function (done) {
       return _this2.processEventsInStore(_this2.stores[storeType], storeSpecificEvents[storeType], done);
@@ -76,9 +75,11 @@ ModelStore.prototype.processEventsInStore = function (store, events, callback) {
   if (!store) {
     throw new Error('Store is missing.');
   }
+
   if (!events) {
     throw new Error('Events are missing.');
   }
+
   if (!callback) {
     throw new Error('Callback is missing.');
   }
@@ -100,18 +101,20 @@ ModelStore.prototype.read = function (options, callback) {
   if (!options) {
     throw new Error('Options are missing.');
   }
+
   if (!options.modelType) {
     throw new Error('Model type is missing.');
   }
+
   if (!options.modelName) {
     throw new Error('Model name is missing.');
   }
+
   if (!callback) {
     throw new Error('Callback is missing.');
   }
 
   options.query = options.query || {};
-
   this.stores[options.modelType].read(options, callback);
 };
 
@@ -119,18 +122,23 @@ ModelStore.prototype.readOne = function (options, callback) {
   if (!options) {
     throw new Error('Options are missing.');
   }
+
   if (!options.modelType) {
     throw new Error('Model type is missing.');
   }
+
   if (!options.modelName) {
     throw new Error('Model name is missing.');
   }
+
   if (!options.query) {
     throw new Error('Query is missing.');
   }
+
   if (!options.query.where) {
     throw new Error('Where is missing.');
   }
+
   if (!callback) {
     throw new Error('Callback is missing.');
   }
@@ -148,18 +156,20 @@ ModelStore.prototype.readOne = function (options, callback) {
     }
 
     var items = [];
+
     var onData = function onData(item) {
       items.push(item);
     };
+
     var onEnd = function onEnd() {
       model.stream.removeListener('data', onData);
       model.stream.removeListener('end', onEnd);
-
       var firstItem = items[0];
 
       if (!firstItem) {
         return callback(new Error('Item not found.'));
       }
+
       callback(null, firstItem);
     };
 

@@ -7,5 +7,4 @@ var wires = {
   https: Https,
   wss: Wss
 };
-
 module.exports = wires;

@@ -9,18 +9,23 @@ var buildCommandApi = function buildCommandApi(options) {
   if (!options) {
     throw new Error('Options are missing.');
   }
+
   if (!options.app) {
     throw new Error('App is missing.');
   }
+
   if (!options.wire) {
     throw new Error('Wire is missing.');
   }
+
   if (!options.contextName) {
     throw new Error('Context name is missing.');
   }
+
   if (!options.aggregateName) {
     throw new Error('Aggregate name is missing.');
   }
+
   if (!options.commandName) {
     throw new Error('Command name is missing.');
   }
@@ -30,10 +35,8 @@ var buildCommandApi = function buildCommandApi(options) {
       contextName = options.contextName,
       aggregateName = options.aggregateName,
       _options$aggregateId = options.aggregateId,
-      aggregateId = _options$aggregateId === undefined ? uuid() : _options$aggregateId,
+      aggregateId = _options$aggregateId === void 0 ? uuid() : _options$aggregateId,
       commandName = options.commandName;
-
-
   return function (data, commandOptions) {
     var _ref = commandOptions || {},
         asUser = _ref.asUser;
@@ -52,8 +55,11 @@ var buildCommandApi = function buildCommandApi(options) {
         asUser: asUser
       }
     });
-
-    return new CommandRunner({ app: app, wire: wire, command: command });
+    return new CommandRunner({
+      app: app,
+      wire: wire,
+      command: command
+    });
   };
 };
 

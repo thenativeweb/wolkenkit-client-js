@@ -6,24 +6,25 @@ var request = function request(options, reqData, callback) {
   if (!options) {
     throw new Error('Options are missing.');
   }
+
   if (!callback) {
     callback = reqData;
     reqData = undefined;
   }
+
   if (!callback) {
     throw new Error('Callback is missing.');
   }
 
   var hasErrored = false,
-      onReqError = void 0,
-      unsubscribeReq = void 0,
-      unsubscribeRes = void 0;
-
+      onReqError,
+      unsubscribeReq,
+      unsubscribeRes;
   var req = https.request(options, function (res) {
     var body = '',
-        onResData = void 0,
-        onResEnd = void 0,
-        onResError = void 0;
+        onResData,
+        onResEnd,
+        onResError;
 
     unsubscribeRes = function unsubscribeRes() {
       res.removeListener('data', onResData);
@@ -38,19 +39,21 @@ var request = function request(options, reqData, callback) {
     onResEnd = function onResEnd() {
       unsubscribeReq();
       unsubscribeRes();
-      callback(null, { statusCode: res.statusCode, body: body });
+      callback(null, {
+        statusCode: res.statusCode,
+        body: body
+      });
     };
 
     onResError = function onResError(err) {
       if (hasErrored) {
         return;
       }
-      hasErrored = true;
 
+      hasErrored = true;
       unsubscribeReq();
       unsubscribeRes();
       res.resume();
-
       callback(err);
     };
 
@@ -67,8 +70,8 @@ var request = function request(options, reqData, callback) {
     if (hasErrored) {
       return;
     }
-    hasErrored = true;
 
+    hasErrored = true;
     unsubscribeReq();
     callback(err);
   };
@@ -78,6 +81,7 @@ var request = function request(options, reqData, callback) {
   if (reqData) {
     req.write(reqData);
   }
+
   req.end();
 };
 

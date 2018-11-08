@@ -1,13 +1,9 @@
 'use strict';
 
-const when = {
-  'planning.peerGroup.triggeredFlow' (event, services, mark) {
-    const app = services.get('app');
-
+const reactions = {
+  'planning.peerGroup.triggeredFlow' (event, { app }) {
     app.planning.peerGroup(event.aggregate.id).notifyFromFlow();
-
-    mark.asDone();
   }
 };
 
-module.exports = { when };
+module.exports = { reactions };

@@ -1,6 +1,6 @@
 'use strict';
 
-const only = require('wolkenkit-command-tools').only;
+const { only } = require('wolkenkit-command-tools');
 
 const wasAlreadyJoinedBy = function (peerGroup, participant) {
   return peerGroup.state.participants.indexOf(participant) !== -1;
@@ -10,11 +10,13 @@ const initialState = {
   initiator: undefined,
   destination: undefined,
   participants: [],
+
   isAuthorized: {
     commands: {
       start: { forPublic: true },
       join: { forPublic: true },
       joinAndFail: { forPublic: true },
+      joinAndReject: { forPublic: true },
       publishForPublic: { forPublic: true },
       publishForAuthenticated: { forPublic: true },
       publishForOwner: { forPublic: true },
@@ -36,7 +38,7 @@ const initialState = {
 const commands = {
   start: [
     only.ifNotExists(),
-    (peerGroup, command, mark) => {
+    (peerGroup, command) => {
       peerGroup.events.publish('started', {
         initiator: command.data.initiator,
         destination: command.data.destination
@@ -45,23 +47,19 @@ const commands = {
       peerGroup.events.publish('joined', {
         participant: command.data.initiator
       });
-
-      mark.asDone();
     }
   ],
 
   join: [
     only.ifExists(),
-    (peerGroup, command, mark) => {
+    (peerGroup, command) => {
       if (wasAlreadyJoinedBy(peerGroup, command.data.participant)) {
-        return mark.asRejected('Participant had already joined.');
+        return command.reject('Participant had already joined.');
       }
 
       peerGroup.events.publish('joined', {
         participant: command.data.participant
       });
-
-      mark.asDone();
     }
   ],
 
@@ -69,29 +67,28 @@ const commands = {
     throw new Error('Something, somewhere went horribly wrong...');
   },
 
-  publishForPublic (peerGroup, command, mark) {
+  joinAndReject (peerGroup, command) {
+    command.reject('Something, somewhere went horribly wrong...');
+  },
+
+  publishForPublic (peerGroup) {
     peerGroup.events.publish('publishedForPublic');
-    mark.asDone();
   },
 
-  publishForAuthenticated (peerGroup, command, mark) {
+  publishForAuthenticated (peerGroup) {
     peerGroup.events.publish('publishedForAuthenticated');
-    mark.asDone();
   },
 
-  publishForOwner (peerGroup, command, mark) {
+  publishForOwner (peerGroup) {
     peerGroup.events.publish('publishedForOwner');
-    mark.asDone();
   },
 
-  triggerFlow (peerGroup, command, mark) {
+  triggerFlow (peerGroup) {
     peerGroup.events.publish('triggeredFlow');
-    mark.asDone();
   },
 
-  notifyFromFlow (peerGroup, command, mark) {
+  notifyFromFlow (peerGroup) {
     peerGroup.events.publish('notifiedFromFlow');
-    mark.asDone();
   }
 };
 

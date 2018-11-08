@@ -1,7 +1,9 @@
 'use strict';
 
+const { parse } = require('url');
+
 const async = require('async'),
-      MongoClient = require('mongodb').MongoClient;
+      { MongoClient } = require('mongodb');
 
 const resetMongoDb = function (options, callback) {
   if (!options) {
@@ -12,10 +14,13 @@ const resetMongoDb = function (options, callback) {
   }
 
   /* eslint-disable id-length */
-  MongoClient.connect(options.url, { w: 1 }, (errConnect, db) => {
+  MongoClient.connect(options.url, { w: 1, useNewUrlParser: true }, (errConnect, client) => {
     if (errConnect) {
       return callback(errConnect);
     }
+
+    const databaseName = parse(options.url).pathname.substring(1);
+    const db = client.db(databaseName);
 
     /* eslint-enable id-length */
     db.collections((errCollections, collections) => {
@@ -33,7 +38,7 @@ const resetMongoDb = function (options, callback) {
           return callback(err);
         }
 
-        db.close(errClose => {
+        client.close(errClose => {
           if (errClose) {
             return callback(errClose);
           }

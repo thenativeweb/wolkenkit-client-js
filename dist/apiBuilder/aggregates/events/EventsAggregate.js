@@ -8,9 +8,11 @@ var EventsAggregate = function EventsAggregate(options) {
   if (!options) {
     throw new Error('Options are missing.');
   }
+
   if (!options.wire) {
     throw new Error('Wire is missing.');
   }
+
   if (!options.writeModel) {
     throw new Error('Write model is missing.');
   }
@@ -22,10 +24,10 @@ var EventsAggregate = function EventsAggregate(options) {
 EventsAggregate.prototype.observe = function (options) {
   var wire = this.wire,
       writeModel = this.writeModel;
-
-
   options = options || {};
-  options.where = assign({}, { type: 'domain' }, options.where);
+  options.where = assign({}, {
+    type: 'domain'
+  }, options.where);
 
   if (!isEventIn(writeModel, options.where)) {
     throw new Error('Unknown event.');
@@ -37,18 +39,13 @@ EventsAggregate.prototype.observe = function (options) {
     },
     started: function started() {},
     received: function received() {}
-  };
-
-  // This needs to be deferred to the next tick so that the user has a chance
+  }; // This needs to be deferred to the next tick so that the user has a chance
   // to attach the various functions such as started, received, and failed to
   // this instance.
+
   process.nextTick(function () {
     var events = wire.subscribeToEvents(options.where);
-
-    var onData = void 0,
-        onEnd = void 0,
-        onError = void 0,
-        onStart = void 0;
+    var onData, onEnd, onError, onStart;
 
     var cancel = function cancel() {
       events.cancel();
@@ -84,21 +81,17 @@ EventsAggregate.prototype.observe = function (options) {
     events.stream.on('end', onEnd);
     events.stream.on('error', onError);
   });
-
   return {
     failed: function failed(callback) {
       callbacks.failed = callback;
-
       return this;
     },
     started: function started(callback) {
       callbacks.started = callback;
-
       return this;
     },
     received: function received(callback) {
       callbacks.received = callback;
-
       return this;
     }
   };

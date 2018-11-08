@@ -1,12 +1,22 @@
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 var events = require('events'),
     stream = require('stream');
@@ -18,38 +28,44 @@ var Promise = require('es6-promise').Promise,
 var EventEmitter = events.EventEmitter,
     PassThrough = stream.PassThrough;
 
-var Wss = function (_EventEmitter) {
+var Wss =
+/*#__PURE__*/
+function (_EventEmitter) {
   _inherits(Wss, _EventEmitter);
 
   function Wss(options) {
+    var _this;
+
     _classCallCheck(this, Wss);
 
     if (!options) {
       throw new Error('Options are missing.');
     }
+
     if (!options.app) {
       throw new Error('App is missing.');
     }
+
     if (!options.host) {
       throw new Error('Host is missing.');
     }
+
     if (!options.port) {
       throw new Error('Port is missing.');
     }
 
-    var _this = _possibleConstructorReturn(this, (Wss.__proto__ || Object.getPrototypeOf(Wss)).call(this));
-
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Wss).call(this));
     _this.app = options.app;
     _this.host = options.host;
     _this.port = options.port;
-
-    var webSocket = new WebSocket('wss://' + _this.host + ':' + _this.port);
+    var webSocket = new WebSocket("wss://".concat(_this.host, ":").concat(_this.port));
 
     webSocket.onopen = function () {
       _this.emit('connect');
     };
 
     _this.socket = new EventEmitter();
+
     _this.socket.send = function (message) {
       if (webSocket.readyState !== WebSocket.OPEN) {
         throw new Error('WebSocket is not open.');
@@ -63,18 +79,20 @@ var Wss = function (_EventEmitter) {
         var message = JSON.parse(event.data);
 
         if (!message.procedureId) {
-          return _this.emit('error', new Error(message.payload + ' (' + message.statusCode + ')'));
+          return _this.emit('error', new Error("".concat(message.payload, " (").concat(message.statusCode, ")")));
         }
+
         _this.socket.emit(message.procedureId, message);
       } catch (ex) {
         _this.socket.emit('error', ex);
       }
     };
+
     return _this;
   }
 
   _createClass(Wss, [{
-    key: 'sendCommand',
+    key: "sendCommand",
     value: function sendCommand(command) {
       var _this2 = this;
 
@@ -85,10 +103,7 @@ var Wss = function (_EventEmitter) {
       return new Promise(function (resolve, reject) {
         var app = _this2.app,
             socket = _this2.socket;
-
-
         var token = app.auth.getToken();
-
         var message = {
           type: 'sendCommand',
           version: 'v1',
@@ -125,19 +140,15 @@ var Wss = function (_EventEmitter) {
       });
     }
   }, {
-    key: 'subscribeToEvents',
+    key: "subscribeToEvents",
     value: function subscribeToEvents(filter) {
       var _this3 = this;
 
       filter = filter || {};
-
       var app = this.app,
           socket = this.socket;
-
       var hasBeenCanceledByUser = false;
-
       var token = app.auth.getToken();
-
       var message = {
         type: 'subscribeEvents',
         version: 'v1',
@@ -151,14 +162,15 @@ var Wss = function (_EventEmitter) {
         message.token = token;
       }
 
-      var subscriptionStream = new PassThrough({ objectMode: true });
-
-      var onSubscriptionFinish = void 0,
-          onSubscriptionMessage = void 0;
+      var subscriptionStream = new PassThrough({
+        objectMode: true
+      });
+      var onSubscriptionFinish, onSubscriptionMessage;
 
       var unsubscribe = function unsubscribe() {
         subscriptionStream.removeListener('finish', onSubscriptionFinish);
         socket.removeListener(message.procedureId, onSubscriptionMessage);
+
         try {
           socket.send({
             type: 'unsubscribeEvents',
@@ -174,6 +186,7 @@ var Wss = function (_EventEmitter) {
           if (hasBeenCanceledByUser) {
             return;
           }
+
           subscriptionStream.emit('error', ex);
         }
       };
@@ -193,14 +206,17 @@ var Wss = function (_EventEmitter) {
           case 'subscribedEvents':
             subscriptionStream.emit('start');
             break;
+
           case 'event':
             subscriptionStream.write(subscriptionMessage.payload);
             break;
+
           case 'error':
             unsubscribe();
 
             if (subscriptionMessage.statusCode === 401) {
               subscriptionStream.end();
+
               _this3.emit('authentication-required');
 
               return;
@@ -208,16 +224,16 @@ var Wss = function (_EventEmitter) {
 
             subscriptionStream.emit('error', subscriptionMessage.payload);
             break;
+
           default:
             throw new Error('Invalid operation.');
         }
       };
 
       subscriptionStream.on('finish', onSubscriptionFinish);
-      socket.on(message.procedureId, onSubscriptionMessage);
-
-      // This needs to be deferred to the next tick so that the user has a chance
+      socket.on(message.procedureId, onSubscriptionMessage); // This needs to be deferred to the next tick so that the user has a chance
       // to attach to the error event of the subscriptionStream that is returned synchronously.
+
       process.nextTick(function () {
         try {
           socket.send(message);
@@ -225,20 +241,24 @@ var Wss = function (_EventEmitter) {
           subscriptionStream.emit('error', ex);
         }
       });
-
-      return { stream: subscriptionStream, cancel: cancelSubscription };
+      return {
+        stream: subscriptionStream,
+        cancel: cancelSubscription
+      };
     }
   }, {
-    key: 'readModel',
+    key: "readModel",
     value: function readModel(options) {
       var _this4 = this;
 
       if (!options) {
         throw new Error('Options are missing.');
       }
+
       if (!options.modelName) {
         throw new Error('Model name is missing.');
       }
+
       if (!options.modelType) {
         throw new Error('Model type is missing.');
       }
@@ -247,28 +267,27 @@ var Wss = function (_EventEmitter) {
           socket = this.socket;
       var modelName = options.modelName,
           modelType = options.modelType;
-
       var hasBeenCanceledByUser = false;
-
       options.query = options.query || {};
-
       var query = {};
 
       if (options.query.where) {
         query.where = options.query.where;
       }
+
       if (options.query.orderBy) {
         query.orderBy = options.query.orderBy;
       }
+
       if (options.query.skip) {
         query.skip = options.query.skip;
       }
+
       if (options.query.take) {
         query.take = options.query.take;
       }
 
       var token = app.auth.getToken();
-
       var message = {
         type: 'subscribeRead',
         version: 'v1',
@@ -284,10 +303,10 @@ var Wss = function (_EventEmitter) {
         message.token = token;
       }
 
-      var modelStream = new PassThrough({ objectMode: true });
-
-      var onModelFinish = void 0,
-          onModelMessage = void 0;
+      var modelStream = new PassThrough({
+        objectMode: true
+      });
+      var onModelFinish, onModelMessage;
 
       var unsubscribe = function unsubscribe() {
         modelStream.removeListener('finish', onModelFinish);
@@ -308,6 +327,7 @@ var Wss = function (_EventEmitter) {
           if (hasBeenCanceledByUser) {
             return;
           }
+
           modelStream.emit('error', ex);
         }
       };
@@ -327,18 +347,22 @@ var Wss = function (_EventEmitter) {
           case 'subscribedRead':
             modelStream.emit('start');
             break;
+
           case 'item':
             modelStream.write(modelMessage.payload);
             break;
+
           case 'finish':
             modelStream.end();
             unsubscribe();
             break;
+
           case 'error':
             unsubscribe();
 
             if (modelMessage.statusCode === 401) {
               modelStream.end();
+
               _this4.emit('authentication-required');
 
               return;
@@ -346,16 +370,16 @@ var Wss = function (_EventEmitter) {
 
             modelStream.emit('error', modelMessage.payload);
             break;
+
           default:
             throw new Error('Invalid operation.');
         }
       };
 
       modelStream.on('finish', onModelFinish);
-      socket.on(message.procedureId, onModelMessage);
-
-      // This needs to be deferred to the next tick so that the user has a chance
+      socket.on(message.procedureId, onModelMessage); // This needs to be deferred to the next tick so that the user has a chance
       // to attach to the error event of the modelStream that is returned synchronously.
+
       process.nextTick(function () {
         try {
           socket.send(message);
@@ -363,8 +387,10 @@ var Wss = function (_EventEmitter) {
           modelStream.emit('error', ex);
         }
       });
-
-      return { stream: modelStream, cancel: cancelModel };
+      return {
+        stream: modelStream,
+        cancel: cancelModel
+      };
     }
   }]);
 

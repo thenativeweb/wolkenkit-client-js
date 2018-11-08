@@ -13,7 +13,7 @@ const post = async function () {
 
   const testApplicationDirectory = path.join(__dirname, '..', 'shared', 'testApp');
 
-  const childProcess = shell.exec('npx wolkenkit stop --dangerously-destroy-data', {
+  const childProcess = shell.exec('../../../node_modules/wolkenkit/src/bin/wolkenkit.js stop --dangerously-destroy-data', {
     cwd: testApplicationDirectory
   });
 

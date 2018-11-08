@@ -62,7 +62,6 @@ var isEventIn = function isEventIn(writeModel, event) {
   var contextName = event.context ? event.context.name : undefined;
   var aggregateName = event.aggregate ? event.aggregate.name : undefined;
   var eventName = event.name;
-
   return isEventInWriteModel(writeModel, contextName, aggregateName, eventName);
 };
 

@@ -6,35 +6,32 @@ const fields = {
   participants: { initialState: []}
 };
 
-const when = {
-  'planning.peerGroup.started': (peerGroups, event, mark) => {
+const projections = {
+  'planning.peerGroup.started' (peerGroups, event) {
     peerGroups.add({
       initiator: event.data.initiator,
       destination: event.data.destination,
       participants: fields.participants.initialState
     });
-    mark.asDone();
   },
 
-  'planning.peerGroup.joined': (peerGroups, event, mark) => {
+  'planning.peerGroup.joined' (peerGroups, event) {
     peerGroups.update({
       where: { id: event.aggregate.id },
       set: {
         participants: { $add: event.data.participant }
       }
     });
-    mark.asDone();
   },
 
-  'planning.peerGroup.left': (peerGroups, event, mark) => {
+  'planning.peerGroup.left' (peerGroups, event) {
     peerGroups.update({
       where: { id: event.aggregate.id },
       set: {
         participants: { $remove: event.data.participant }
       }
     });
-    mark.asDone();
   }
 };
 
-module.exports = { fields, when };
+module.exports = { fields, projections };
