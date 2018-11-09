@@ -28,6 +28,10 @@ const getTestsFor = function ({ browserConfiguration, seleniumEnvironment }) {
     suite('integration tests', function () {
       this.timeout(60 * 60 * 1000);
 
+      if (seleniumEnvironment === 'browserstack') {
+        this.retries(3);
+      }
+
       let browser;
 
       const applicationUrl = 'http://local.wolkenkit.io:4567/integration/',
