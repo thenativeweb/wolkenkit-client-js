@@ -32,9 +32,9 @@
     "ws": "./dist/wires/ws-browser.js"
   },
   "dependencies": {
-    "@babel/runtime": "7.1.5",
+    "@babel/runtime": "7.2.0",
     "async": "2.6.1",
-    "commands-events": "1.0.3",
+    "commands-events": "1.0.4",
     "defekt": "2.0.1",
     "es6-promise": "4.2.5",
     "http-browserify-2": "0.5.1",
@@ -48,7 +48,7 @@
     "ws": "6.1.0"
   },
   "devDependencies": {
-    "@babel/polyfill": "7.0.0",
+    "@babel/polyfill": "7.2.5",
     "assertthat": "2.0.0",
     "babel-loader": "8.0.4",
     "body-parser": "1.18.3",
