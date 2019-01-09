@@ -17,8 +17,8 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-app.post('/stop-broker', (req, res) => {
-  const result = shell.exec(`docker stop test-broker`);
+app.post('/stop-proxy', (req, res) => {
+  const result = shell.exec(`docker stop test-proxy`);
 
   if (result.code > 0) {
     return res.status(500).json({ error: result.stderr });
@@ -27,8 +27,8 @@ app.post('/stop-broker', (req, res) => {
   res.status(200).end();
 });
 
-app.post('/start-broker', (req, res) => {
-  const result = shell.exec(`docker start test-broker`);
+app.post('/start-proxy', (req, res) => {
+  const result = shell.exec(`docker start test-proxy`);
 
   if (result.code > 0) {
     return res.status(500).json({ error: result.stderr });

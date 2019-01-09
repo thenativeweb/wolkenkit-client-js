@@ -903,7 +903,7 @@ const getTestsFor = function (testOptions) {
     suite('offline', () => {
       suiteTeardown(done => {
         request.
-          post(`${env.REMOTE_URL}/start-broker`).
+          post(`${env.REMOTE_URL}/start-proxy`).
           end((err, res) => {
             if (err) {
               return done(err);
@@ -931,7 +931,7 @@ const getTestsFor = function (testOptions) {
       });
 
       // This test *has* to come first in the offline suite, as it disconnects
-      // the application from the broker. The suite only works when this test
+      // the application from the proxy. The suite only works when this test
       // runs at all, and if it runs first.
       test('raises a disconnected event if the connection is lost.', done => {
         plcr.once('disconnected', () => {
@@ -939,7 +939,7 @@ const getTestsFor = function (testOptions) {
         });
 
         request.
-          post(`${env.REMOTE_URL}/stop-broker`).
+          post(`${env.REMOTE_URL}/stop-proxy`).
           end((err, res) => {
             if (err) {
               return done(err);
