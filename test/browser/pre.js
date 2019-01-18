@@ -46,7 +46,7 @@ const pre = async function () {
 
   processes.remoteServer = shell.exec(`node ${remoteServerBinary}`, { async: true });
 
-  childProcess = shell.exec('../../../node_modules/wolkenkit/src/bin/wolkenkit.js start --shared-key wolkenkit', {
+  childProcess = shell.exec('../../../node_modules/wolkenkit/src/bin/wolkenkit.js start --shared-key wolkenkit --debug', {
     cwd: testApplicationDirectory
   });
 

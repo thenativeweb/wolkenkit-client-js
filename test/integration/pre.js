@@ -13,7 +13,7 @@ const wolkenkitBinary = path.join(__dirname, '..', '..', 'node_modules', 'wolken
 const pre = async function () {
   processes.remote = shell.exec(`node ${remoteServerBinary}`, { async: true });
 
-  shell.exec(`node ${wolkenkitBinary} start --shared-key wolkenkit`, {
+  shell.exec(`node ${wolkenkitBinary} start --shared-key wolkenkit --debug`, {
     cwd: testApplicationDirectory
   });
 };

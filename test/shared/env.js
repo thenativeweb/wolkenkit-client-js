@@ -7,7 +7,7 @@ let remoteUrl = '';
 remoteUrl = `http://localhost:${remotePort}`;
 
 const env = {
-  MONGO_URL_INTEGRATION: process.env.MONGO_URL_INTEGRATION || 'mongodb://wolkenkit:wolkenkit@local.wolkenkit.io:9002/wolkenkit',
+  MONGO_URL_INTEGRATION: process.env.MONGO_URL_INTEGRATION || 'mongodb://wolkenkit:wolkenkit@local.wolkenkit.io:9031/wolkenkit',
   REMOTE_PORT: remotePort,
   REMOTE_URL: remoteUrl,
   TEST_ENV: process.env.TEST_ENV
