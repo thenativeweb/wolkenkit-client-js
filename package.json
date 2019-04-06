@@ -34,7 +34,7 @@
   "dependencies": {
     "@babel/runtime": "7.2.0",
     "async": "2.6.1",
-    "commands-events": "1.0.4",
+    "commands-events": "thenativeweb/commands-events#ca11473cfb1de65d65d0342540e33e7acfa4dc78",
     "defekt": "2.0.1",
     "es6-promise": "4.2.5",
     "http-browserify-2": "0.5.1",
