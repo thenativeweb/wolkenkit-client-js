@@ -102,7 +102,7 @@ class OpenIdConnect {
     this.onAuthenticated(this.getProfile());
   }
 
-  login () {
+  login (redirectTo) {
     this.onAuthenticating(() => {
       const clientId = window.encodeURIComponent(this.clientId),
             identityProviderUrl = this.identityProviderUrl,
@@ -113,7 +113,7 @@ class OpenIdConnect {
       const nonce = uuid();
 
       window.localStorage.setItem('nonce', nonce);
-      window.localStorage.setItem('redirectTo', window.location.href);
+      window.localStorage.setItem('redirectTo', redirectTo || window.location.href);
       window.location.href = `${identityProviderUrl}?client_id=${clientId}&redirect_uri=${redirectUrl}&scope=${scope}&response_type=${responseType}&nonce=${nonce}`;
     });
   }
