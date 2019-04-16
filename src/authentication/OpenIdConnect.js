@@ -102,7 +102,7 @@ class OpenIdConnect {
     this.onAuthenticated(this.getProfile());
   }
 
-  login (redirectTo) {
+  login ({ redirectTo } = {}) {
     this.onAuthenticating(() => {
       const clientId = window.encodeURIComponent(this.clientId),
             identityProviderUrl = this.identityProviderUrl,

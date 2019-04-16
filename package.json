@@ -22,6 +22,10 @@
     {
       "name": "Jan-Hendrik Grundhöfer",
       "email": "jan-hendrik.grundhoefer@thenativeweb.io"
+    },
+    {
+      "name": "Tom Ceuppens",
+      "email": "t-c@live.be"
     }
   ],
   "main": "dist/wolkenkitClient.js",
