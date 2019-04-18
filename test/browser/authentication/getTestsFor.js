@@ -116,6 +116,13 @@ const getTestsFor = function ({ browserConfiguration, seleniumEnvironment }) {
 
           assert.that(token).is.equalTo('undefined');
 
+          // Assert that there is no redirectTo.
+          let redirectTo = await browser.executeScript(function () {
+            return window.localStorage.getItem('redirectTo') || 'undefined';
+          });
+
+          assert.that(redirectTo).is.equalTo('undefined');
+
           // Assert that there is no profile.
           let profile = await browser.executeScript(function () {
             return window.openIdConnect.getProfile() || 'undefined';
@@ -152,6 +159,13 @@ const getTestsFor = function ({ browserConfiguration, seleniumEnvironment }) {
 
           assert.that(token).is.not.equalTo('undefined');
 
+          // Assert that there is a redirectTo.
+          redirectTo = await browser.executeScript(function () {
+            return window.localStorage.getItem('redirectTo') || 'undefined';
+          });
+
+          assert.that(redirectTo).is.not.equalTo('undefined');
+
           // Assert that there is a profile.
           profile = await browser.executeScript(function () {
             return window.openIdConnect.getProfile() || 'undefined';
@@ -184,6 +198,13 @@ const getTestsFor = function ({ browserConfiguration, seleniumEnvironment }) {
           });
 
           assert.that(token).is.equalTo('undefined');
+
+          // Assert that there is no redirectTo.
+          redirectTo = await browser.executeScript(function () {
+            return window.localStorage.getItem('redirectTo') || 'undefined';
+          });
+
+          assert.that(redirectTo).is.equalTo('undefined');
 
           // Assert that there is no profile.
           profile = await browser.executeScript(function () {
