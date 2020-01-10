@@ -45,7 +45,7 @@
     "is-node": "1.0.2",
     "json-lines-client": "0.7.10",
     "limes": "1.1.0",
-    "lodash": "4.17.11",
+    "lodash": "4.17.12",
     "parse-duration": "0.1.1",
     "streamtoarray": "0.1.4",
     "uuidv4": "2.0.0",
