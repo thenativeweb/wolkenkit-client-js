@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@babel/runtime": "7.2.0",
-    "async": "2.6.1",
+    "async": "3.2.2",
     "commands-events": "1.0.4",
     "defekt": "2.0.1",
     "es6-promise": "4.2.5",
